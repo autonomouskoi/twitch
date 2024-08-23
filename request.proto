@@ -1,0 +1,74 @@
+syntax = "proto3";
+package twitch;
+
+option go_package = "github.com/autonomouskoi/twitch";
+
+import "chat.proto";
+import "eventsub.proto";
+import "twitch.proto";
+
+enum MessageTypeRequest {
+    TYPE_REQUEST_UNSPECIFIED            = 0;
+    TYPE_REQUEST_LIST_PROFILES_REQ      = 1;
+    TYPE_REQUEST_LIST_PROFILES_RESP     = 2;
+    TYPE_REQUEST_IRC_GET_CONFIG_REQ     = 3;
+    TYPE_REQUEST_IRC_GET_CONFIG_RESP    = 4;
+    TYPE_REQUEST_IRC_GET_STATUS_REQ     = 5;
+    TYPE_REQUEST_IRC_GET_STATUS_RESP    = 6;
+    TYPE_REQUEST_EVENT_GET_CONFIG_REQ   = 7;
+    TYPE_REQUEST_EVENT_GET_CONFIG_RESP  = 8;
+    TYPE_REQUEST_EVENT_GET_STATUS_REQ   = 9;
+    TYPE_REQUEST_EVENT_GET_STATUS_RESP  = 10;
+    TYPE_REQUEST_GET_USER_REQ           = 11;
+    TYPE_REQUEST_GET_USER_RESP          = 12;
+    /*
+    TYPE_REQUEST_GET_AVATAR_PATH_REQ  = 5;
+    TYPE_REQUEST_GET_AVATAR_PATH_RESP = 6;
+    */
+}
+
+message ListProfilesRequest {}
+message ListProfilesResponse {
+    repeated  string  names = 1;
+}
+
+message IRCGetConfigRequest {}
+message IRCGetConfigResponse {
+    IRCConfig  config = 1;
+}
+
+message IRCGetStatusRequest {}
+message IRCGetStatusResponse {
+    ChatStatus  status = 1;
+    string      detail = 2;
+}
+
+message EventSubGetConfigRequest {}
+message EventSubGetConfigResponse {
+    EventSubConfig  config = 1;
+}
+
+message EventSubGetStatusRequest {}
+message EventSubGetStatusResponse {
+    EventSubStatus  status = 1;
+    string          detail = 2;
+}
+
+message GetAvatarPathRequest {
+    string  login = 1;
+}
+
+message GetAvatarPathResponse {
+    string  login = 1;
+    string  path  = 2;
+}
+
+message GetUserRequest {
+    string  profile = 1;
+    string  login   = 2;
+}
+
+message GetUserResponse {
+    string  login = 1;
+    User    user  = 2;
+}

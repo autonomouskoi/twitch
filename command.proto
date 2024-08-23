@@ -1,0 +1,75 @@
+syntax = "proto3";
+package twitch;
+
+option go_package = "github.com/autonomouskoi/twitch";
+
+import "chat.proto";
+import "eventsub.proto";
+
+enum MessageTypeCommand {
+    TYPE_COMMAND_UNSPECIFIED = 0;
+
+    TYPE_COMMAND_GET_OAUTH_URL_REQ     = 1;
+    TYPE_COMMAND_GET_OAUTH_URL_RES     = 2;
+    TYPE_COMMAND_WRITE_PROFILE_REQ     = 3;
+    TYPE_COMMAND_WRITE_PROFILE_RESP    = 4;
+    TYPE_COMMAND_DELETE_PROFILE_REQ    = 5;
+    TYPE_COMMAND_DELETE_PROFILE_RESP   = 6;
+    TYPE_COMMAND_IRC_SET_CONFIG_REQ    = 7;
+    TYPE_COMMAND_IRC_SET_CONFIG_RESP   = 8;
+    TYPE_COMMAND_EVENT_SET_CONFIG_REQ  = 9;
+    TYPE_COMMAND_EVENT_SET_CONFIG_RESP = 10;
+
+/*
+    TYPE_COMMAND_BAN_USER = 3;
+*/
+}
+
+message BanUserRequest {
+    string  login  = 1;
+    string  reason = 2;
+}
+
+message Token {
+              string  client_id = 1;
+              string  access    = 2;
+    repeated  string  scopes    = 3;
+              string  user_id   = 4;
+}
+
+message Profile {
+    string  name    = 1;
+    string  user_id = 2;
+    Token   token   = 3;
+}
+
+message Config {
+    map<string,Profile>  profiles   = 1;
+    IRCConfig            irc_config = 2;
+    EventSubConfig       es_config  = 3;
+}
+
+message GetOAuthURLRequest {}
+message GetOAuthURLResponse {
+    string  url = 1;
+}
+
+message WriteProfileRequest {
+    Profile  profile = 1;
+}
+message WriteProfileResponse {}
+
+message DeleteProfileRequest {
+    string  name = 1;
+}
+message DeleteProfileResponse {}
+
+message IRCSetConfigRequest {
+    IRCConfig  config = 1;
+}
+message IRCSetConfigResponse {}
+
+message EventSubSetConfigRequest {
+    EventSubConfig  config = 1;
+}
+message EventSubSetConfigResponse {}

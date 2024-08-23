@@ -1,0 +1,28 @@
+syntax = "proto3";
+package twitch;
+
+option go_package = "github.com/autonomouskoi/twitch";
+
+enum BusTopics {
+    TWITCH_EVENT          = 0;
+    TWITCH_REQUEST        = 1;    
+    TWITCH_COMMAND        = 2;
+    TWITCH_CHAT_EVENT     = 3;
+    TWITCH_CHAT_RECV      = 4;
+    TWITCH_CHAT_SEND      = 5;
+    TWITCH_EVENTSUB_EVENT = 6;
+}
+
+message User {
+    string  id                = 1;
+    string  login             = 2;
+    string  display_name      = 3;
+    string  type              = 4;
+    string  broadcaster_type  = 5;
+    string  description       = 6;
+    string  profile_image_url = 7;
+    string  offline_image_url = 8;
+    uint32  view_count        = 9;
+    string  email             = 10;
+    uint32  created_at        = 11;
+}

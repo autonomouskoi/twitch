@@ -1,0 +1,73 @@
+syntax = "proto3";
+package twitch;
+
+option go_package = "github.com/autonomouskoi/twitch";
+
+enum MessageTypeEventSub {
+    TYPE_UNSPECIFIED                 = 0;
+    TYPE_EVENTSUB_EVENT              = 1;
+    TYPE_CHANNEL_RAID                = 2;
+    TYPE_CHANNEL_FOLLOW              = 3;
+    TYPE_CHANNEL_CHEER               = 4;
+    TYPE_CHANNEL_POINT_CUSTOM_REDEEM = 5;
+}
+
+enum EventSubStatus {
+    EVENT_SUB_STATUS_UNKNOWN   = 0;
+    EVENT_SUB_STATUS_OFF       = 1;
+    EVENT_SUB_STATUS_CONNECTED = 2;
+    EVENT_SUB_STATUS_ERROR     = 3;
+}
+
+message EventSubStatusEvent {
+    EventSubStatus  status = 1;
+    string          detail = 2;
+}
+
+message EventSubConfig {
+    bool    enabled = 1;
+    string  profile = 2;
+}
+
+message EventUser {
+    string  id    = 1;
+    string  login = 2;
+    string  name  = 3;
+}
+
+message EventChannelCheer {
+    optional  bool       is_anonymous = 1;
+              EventUser  from         = 2;
+              EventUser  broadcaster  = 3;
+    optional  string     message      = 4;
+              uint32     bits         = 5;
+}
+
+message EventChannelFollow {
+    EventUser   follower    = 1;
+    EventUser   broadcaster = 2;
+    int64       at          = 3;
+}
+
+message Reward {
+    string  id     = 1;
+    string  title  = 2;
+    int32   cost   = 3;
+    string  prompt = 4;
+}
+
+message EventChannelPointsCustomRewardRedemption {
+    string     id          = 1;
+    EventUser  broadcaster = 2;
+    EventUser  user        = 3;
+    string     input       = 4;
+    string     status      = 5; 
+    Reward     reward      = 6;
+    int64      redeemed_at = 7;
+}
+
+message EventChannelRaid {
+    EventUser  from_broadcaster = 1;
+    EventUser  to_broadcaster   = 2;
+    uint32     viewers          = 3;
+}
