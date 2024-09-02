@@ -70,7 +70,8 @@ func newIRCClient(cfg *IRCConfig, mBus *bus.Bus, log *slog.Logger, accessToken s
 		}
 		mBus.Send(
 			&bus.BusMessage{
-				Topic:   BusTopics_TWITCH_CHAT_RECV.String(),
+				Topic:   BusTopics_TWITCH_CHAT_EVENT.String(),
+				Type:    int32(MessageTypeTwitchChatEvent_TWITCH_CHAT_EVENT_TYPE_MESSAGE_IN),
 				Message: b,
 			})
 	})
@@ -133,8 +134,8 @@ func newIRCClient(cfg *IRCConfig, mBus *bus.Bus, log *slog.Logger, accessToken s
 	return ircC
 }
 
-func pb(line *irc.Line) *ChatMessageIn {
-	mi := &ChatMessageIn{
+func pb(line *irc.Line) *TwitchChatEventMessageIn {
+	mi := &TwitchChatEventMessageIn{
 		Text:   line.Text(),
 		Args:   line.Args,
 		Nick:   line.Nick,

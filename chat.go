@@ -53,31 +53,39 @@ func (t *Twitch) startChat(cfg *IRCConfig) {
 			c.setStatus(ChatStatus_CHAT_STATUS_ERROR, err.Error())
 			return fmt.Errorf("connecting to IRC: %w", err)
 		}
-
-		in := make(chan *bus.BusMessage, 64)
-		c.bus.Subscribe(BusTopics_TWITCH_CHAT_SEND.String(), in)
-		go func() {
-			<-ctx.Done()
-			c.bus.Unsubscribe(BusTopics_TWITCH_CHAT_SEND.String(), in)
-			bus.Drain(in)
-		}()
 		c.setStatus(ChatStatus_CHAT_STATUS_CONNECTED, "Connected!")
-		for msg := range in {
-			cmo := &ChatMessageOut{}
-			if err := proto.Unmarshal(msg.GetMessage(), cmo); err != nil {
-				c.log.Error("unmarshalling", "type", "ChatMessageOut")
-				continue
-			}
-			text := cmo.Text
-			if c.cfg.MessagePrefix != "" {
-				text = c.cfg.MessagePrefix + text
-			}
-			ircC.Privmsg("#"+c.cfg.GetProfile(), text)
-		}
-		c.setStatus(ChatStatus_CHAT_STATUS_OFF, "Disconnected")
+		c.bus.HandleTypes(ctx, BusTopics_TWITCH_CHAT_REQUEST.String(), 4,
+			map[int32]bus.MessageHandler{
+				int32(MessageTypeTwitchChatRequest_TWITCH_CHAT_REQUEST_TYPE_SEND_REQ): func(msg *bus.BusMessage) *bus.BusMessage {
+					reply := &bus.BusMessage{
+						Topic: msg.Topic,
+						Type:  msg.Type + 1,
+					}
+					cmo := &TwitchChatRequestSendRequest{}
+					if err := proto.Unmarshal(msg.GetMessage(), cmo); err != nil {
+						c.log.Error("unmarshalling", "type", "TwitchChatRequestSendRequest")
+						reply.Error = &bus.Error{
+							Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
+							Detail: proto.String("marshalling TwitchChatRequestSendRequest: " + err.Error()),
+						}
+						return reply
+					}
+					text := cmo.Text
+					if c.cfg.MessagePrefix != "" {
+						text = c.cfg.MessagePrefix + text
+					}
+					ircC.Privmsg("#"+c.cfg.GetProfile(), text)
+					reply.Message, _ = proto.Marshal(&TwitchChatRequestSendResponse{})
+					return reply
+				},
+			},
+			nil,
+		)
+
 		if err := ircC.Close(); err != nil {
 			return fmt.Errorf("closing IRC: %w", err)
 		}
+		c.setStatus(ChatStatus_CHAT_STATUS_OFF, "Disconnected")
 
 		return nil
 	})

@@ -9,6 +9,15 @@ message IRCConfig {
     string  message_prefix = 3;
 }
 
+enum MessageTypeTwitchChatEvent {
+    TWITCH_CHAT_EVENT_TYPE_MESSAGE_IN = 0;
+}
+
+enum MessageTypeTwitchChatRequest {
+    TWITCH_CHAT_REQUEST_TYPE_SEND_REQ  = 0;
+    TWITCH_CHAT_REQUEST_TYPE_SEND_RESP = 1;
+}
+
 enum ChatStatus {
     CHAT_STATUS_UNKNOWN   = 0;
     CHAT_STATUS_OFF       = 1;
@@ -16,9 +25,10 @@ enum ChatStatus {
     CHAT_STATUS_ERROR     = 3;
 }
 
-message ChatMessageOut {
+message TwitchChatRequestSendRequest {
     string  text = 1;
 }
+message TwitchChatRequestSendResponse {}
 
 message EmotePosition {
     uint32  start = 1;
@@ -30,7 +40,7 @@ message Emote {
     repeated  EmotePosition  positions = 2;
 }
 
-message ChatMessageIn {
+message TwitchChatEventMessageIn {
               string               text   = 1;
     repeated  string               args   = 2;
               string               nick   = 3;

@@ -8,8 +8,8 @@ enum BusTopics {
     TWITCH_REQUEST        = 1;    
     TWITCH_COMMAND        = 2;
     TWITCH_CHAT_EVENT     = 3;
-    TWITCH_CHAT_RECV      = 4;
-    TWITCH_CHAT_SEND      = 5;
+    TWITCH_CHAT_REQUEST   = 4;
+    TWITCH_CHAT_COMMAND   = 5;
     TWITCH_EVENTSUB_EVENT = 6;
 }
 
