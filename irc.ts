@@ -4,13 +4,11 @@ import * as chatpb from "/m/twitch/pb/chat_pb.js";
 import * as commandpb from "/m/twitch/pb/command_pb.js";
 import * as requestpb from "/m/twitch/pb/request_pb.js";
 import * as twitchpb from "/m/twitch/pb/twitch_pb.js";
-import { Timestamp } from "@bufbuild/protobuf";
 
 const TOPIC_TWITCH_COMMAND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_COMMAND);
 const TOPIC_TWITCH_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_REQUEST);
-const TOPIC_TWICH_CHAT_EVENT = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_EVENT);
-const TOPIC_TWITCH_CHAT_RECV = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_RECV);
-const TOPIC_TWITCH_CHAT_SEND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_SEND);
+const TOPIC_TWITCH_CHAT_EVENT = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_EVENT);
+const TOPIC_TWITCH_CHAT_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_REQUEST);
 
 interface Status {
     status: chatpb.ChatStatus;
@@ -28,7 +26,9 @@ class IRCStatus extends HTMLElement {
     }
 
     connectedCallback() {
-        bus.subscribe(TOPIC_TWICH_CHAT_EVENT, (msg) => this.handleChatEvent(msg));
+        // this causes us to receive chat messages twice. To need modify the bus
+        // to be an array of subscriptions
+        //bus.subscribe(TOPIC_TWITCH_CHAT_EVENT, (msg) => this.handleChatEvent(msg));
         let msg = new buspb.BusMessage();
         msg.topic = TOPIC_TWITCH_REQUEST;
         msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_IRC_GET_STATUS_REQ;
@@ -42,7 +42,7 @@ class IRCStatus extends HTMLElement {
             }));
     }
     disconnectedCallback() {
-        bus.unsubscribe(TOPIC_TWICH_CHAT_EVENT);
+        bus.unsubscribe(TOPIC_TWITCH_CHAT_EVENT);
     }
 
     handleChatEvent(msg: buspb.BusMessage) {
@@ -72,7 +72,7 @@ class IRCStatus extends HTMLElement {
 }
 customElements.define('twitch-irc-status', IRCStatus);
 
-function chatMessageDiv(cmi: chatpb.ChatMessageIn): HTMLDivElement {
+function chatMessageDiv(cmi: chatpb.TwitchChatEventMessageIn): HTMLDivElement {
     let div = document.createElement('div') as HTMLDivElement;
     div.innerHTML= `
 ${new Date().toLocaleString()} | ${cmi.nick}> `;
@@ -129,13 +129,17 @@ section {
     }
 
     connectedCallback() {
-        bus.subscribe(TOPIC_TWITCH_CHAT_RECV, (msg: buspb.BusMessage) => this.handleChatRecv(msg));
+        bus.subscribe(TOPIC_TWITCH_CHAT_EVENT, (msg: buspb.BusMessage) => this.handleChatRecv(msg));
     }
 
     handleChatRecv(msg: buspb.BusMessage) {
-        this.appendCMI(chatpb.ChatMessageIn.fromBinary(msg.message))
+        switch (msg.type) {
+            case chatpb.MessageTypeTwitchChatEvent.TWITCH_CHAT_EVENT_TYPE_MESSAGE_IN:
+                this.appendCMI(chatpb.TwitchChatEventMessageIn.fromBinary(msg.message));
+                break;
+        }
     }
-    appendCMI(cmi: chatpb.ChatMessageIn) {
+    appendCMI(cmi: chatpb.TwitchChatEventMessageIn) {
         this._container.appendChild(chatMessageDiv(cmi));
         while (this._container.children.length > MESSAGE_COUNT) {
             this._container.removeChild(this._container.children[0]);
@@ -148,14 +152,14 @@ section {
         if (!text) {
             return;
         }
-        let cmo = new chatpb.ChatMessageOut();
+        let cmo = new chatpb.TwitchChatRequestSendRequest();
         cmo.text = text;
         let msg = new buspb.BusMessage();
-        msg.topic = TOPIC_TWITCH_CHAT_SEND;
+        msg.topic = TOPIC_TWITCH_CHAT_REQUEST;
         msg.message = cmo.toBinary();
         bus.send(msg);
         this._messageInput.value = '';
-        let cmi = new chatpb.ChatMessageIn();
+        let cmi = new chatpb.TwitchChatEventMessageIn();
         cmi.nick = '(You)';
         cmi.text = text;
         this.appendCMI(cmi);
