@@ -46,7 +46,7 @@ func init() {
 		Description: "Integration with Twitch APIs",
 		WebPaths: []*modules.ManifestWebPath{
 			{
-				Path:        "https://autonomouskoi.org/mod-twitch.html",
+				Path:        "https://autonomouskoi.org/module-twitch.html",
 				Type:        modules.ManifestWebPathType_MANIFEST_WEB_PATH_TYPE_HELP,
 				Description: "Help!",
 			},
