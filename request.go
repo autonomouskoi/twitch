@@ -3,6 +3,7 @@ package twitch
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/nicklaw5/helix/v2"
 	"google.golang.org/protobuf/proto"
@@ -201,4 +202,30 @@ func (t *Twitch) handleEventSubGetStatusRequest(reqMsg *bus.BusMessage) *bus.Bus
 		Type:    int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_RESP),
 		Message: b,
 	}
+}
+
+func GetUser(ctx context.Context, b *bus.Bus, twitchProfile, login string) (*User, error) {
+	msg := &bus.BusMessage{
+		Topic: BusTopics_TWITCH_REQUEST.String(),
+		Type:  int32(MessageTypeRequest_TYPE_REQUEST_GET_USER_REQ),
+	}
+	var err error
+	msg.Message, err = proto.Marshal(&GetUserRequest{
+		Profile: twitchProfile,
+		Login:   login,
+	})
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	reply := b.WaitForReply(ctx, msg)
+	cancel()
+	if reply.Error != nil {
+		return nil, err
+	}
+	gur := &GetUserResponse{}
+	if err := proto.Unmarshal(reply.GetMessage(), gur); err != nil {
+		return nil, err
+	}
+	return gur.GetUser(), nil
 }
