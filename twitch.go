@@ -51,8 +51,13 @@ func init() {
 				Description: "Help!",
 			},
 			{
-				Path:        "/m/twitch/",
+				Path:        "/m/twitch/embed_ctrl.js",
 				Type:        modules.ManifestWebPathType_MANIFEST_WEB_PATH_TYPE_EMBED_CONTROL,
+				Description: "Controls for Twitch",
+			},
+			{
+				Path:        "/m/twitch/index.html",
+				Type:        modules.ManifestWebPathType_MANIFEST_WEB_PATH_TYPE_CONTROL_PAGE,
 				Description: "Controls for Twitch",
 			},
 		},
