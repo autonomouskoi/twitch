@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 
 	"github.com/nicklaw5/helix/v2"
@@ -15,6 +14,7 @@ import (
 	"nhooyr.io/websocket/wsjson"
 
 	"github.com/autonomouskoi/akcore/bus"
+	"github.com/autonomouskoi/akcore/modules/modutil"
 )
 
 const (
@@ -22,6 +22,14 @@ const (
 
 	callbackMethod = "websocket"
 )
+
+var (
+	topicEventSubEvent string
+)
+
+func init() {
+	topicEventSubEvent = MessageTypeEventSub_TYPE_EVENTSUB_EVENT.String()
+}
 
 type twitchClient interface {
 	UserID() string
@@ -70,8 +78,8 @@ func (t *Twitch) stopEventSub() {
 }
 
 type eventSub struct {
+	modutil.ModuleBase
 	bus          *bus.Bus
-	log          *slog.Logger
 	c            *websocket.Conn
 	parentCtx    context.Context
 	twitch       twitchClient
@@ -86,7 +94,7 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 	if es.c != nil {
 		es.c.CloseNow()
 	}
-	es.log.Debug("dialing eventsub websocket", "url", websocketURL)
+	es.Log.Debug("dialing eventsub websocket", "url", websocketURL)
 	c, _, err := websocket.Dial(ctx, websocketURL, nil)
 	if err != nil {
 		return fmt.Errorf("dialing websocket: %w", err)
@@ -95,7 +103,7 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 	defer func() {
 		// if es.c is nil, we didn't get set up properly. Close the websocket
 		if es.c == nil {
-			es.log.Debug("no client, closing")
+			es.Log.Debug("no client, closing")
 			c.CloseNow()
 		}
 	}()
@@ -109,7 +117,7 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 	if err != nil {
 		return fmt.Errorf("getting welcome message: %w", err)
 	}
-	es.log.Debug("got welcome", "msg", *welcome.Session)
+	es.Log.Debug("got welcome", "msg", *welcome.Session)
 	es.setStatus(EventSubStatus_EVENT_SUB_STATUS_CONNECTED, "Connected!")
 
 	for eventType, eventVersion := range map[string]string{
@@ -190,9 +198,9 @@ func (es *eventSub) start(ctx context.Context) error {
 }
 
 func (es *eventSub) close() {
-	es.log.Debug("closing on request")
+	es.Log.Debug("closing on request")
 	if err := es.c.Close(websocket.StatusNormalClosure, ""); err != nil {
-		es.log.Error("closing websocket", "error", err)
+		es.Log.Error("closing websocket", "error", err)
 	}
 }
 
@@ -204,20 +212,20 @@ func (es *eventSub) handleLoop(ctx context.Context) {
 		var msg Message
 		if err := wsjson.Read(ctx, es.c, &msg); err != nil {
 			if !errors.Is(err, context.DeadlineExceeded) {
-				es.log.Error("receiving", "error", err)
+				es.Log.Error("receiving", "error", err)
 				break
 			}
 			continue
 		}
 		if es.seen.seenID(msg.Metadata.ID) {
-			es.log.Debug("duplicate event ID", "id", msg.Metadata.ID)
+			es.Log.Debug("duplicate event ID", "id", msg.Metadata.ID)
 			continue
 		}
 		switch msg.Metadata.Type {
 		case MessageTypeNotification:
 			notification := &Notification{}
 			if err := json.Unmarshal(msg.Payload, &notification); err != nil {
-				es.log.Error("unmarshalling notification", "error", err)
+				es.Log.Error("unmarshalling notification", "error", err)
 				continue
 			}
 			go es.handleNotification(notification)
@@ -226,153 +234,166 @@ func (es *eventSub) handleLoop(ctx context.Context) {
 		case MessageTypeSessionReconnect:
 			welcome, err := msg.AsSessionWelcome()
 			if err != nil {
-				es.log.Error("unmarshalling reconnect", "error", err)
+				es.Log.Error("unmarshalling reconnect", "error", err)
 				continue
 			}
-			es.log.Info("received reconnect")
+			es.Log.Info("received reconnect")
 			if err := es.connect(ctx, *welcome.Session.ReconnectURL); err != nil {
-				es.log.Error("reconnecting", "error", err)
+				es.Log.Error("reconnecting", "error", err)
 				continue
 			}
 		default:
-			es.log.Debug("unhandled message", "type", msg.Metadata.Type, "payload", string(msg.Payload))
+			es.Log.Debug("unhandled message", "type", msg.Metadata.Type, "payload", string(msg.Payload))
 		}
 	}
 }
 
 func (es *eventSub) handleNotification(n *Notification) {
+	var msg *bus.BusMessage
 	switch n.Subscription.Type {
 	case EventTypeChannelPointRedeem:
-		event := &helix.EventSubChannelPointsCustomRewardRedemptionEvent{}
-		if err := json.Unmarshal(n.Event, event); err != nil {
-			es.log.Error("unmarshalling channel point redeem event", "error", err.Error())
-			return
-		}
-		b, err := proto.Marshal(&EventChannelPointsCustomRewardRedemption{
-			Id: event.ID,
-			Broadcaster: &EventUser{
-				Id:    event.BroadcasterUserID,
-				Login: event.BroadcasterUserLogin,
-				Name:  event.BroadcasterUserName,
-			},
-			User: &EventUser{
-				Id:    event.UserID,
-				Login: event.UserLogin,
-				Name:  event.UserName,
-			},
-			Input:  event.UserInput,
-			Status: event.Status,
-			Reward: &Reward{
-				Id:     event.Reward.ID,
-				Title:  event.Reward.Title,
-				Cost:   int32(event.Reward.Cost),
-				Prompt: event.Reward.Prompt,
-			},
-			RedeemedAt: event.RedeemedAt.Unix(),
-		})
-		if err != nil {
-			es.log.Error("marshalling redeem proto", "error", err.Error())
-			return
-		}
-		es.bus.Send(
-			&bus.BusMessage{
-				Topic:   BusTopics_TWITCH_EVENTSUB_EVENT.String(),
-				Type:    int32(MessageTypeEventSub_TYPE_CHANNEL_POINT_CUSTOM_REDEEM),
-				Message: b,
-			})
+		msg = es.handleChannePointRedeem(n.Event)
 	case EventTypeCheer:
-		event := &helix.EventSubChannelCheerEvent{}
-		if err := json.Unmarshal(n.Event, event); err != nil {
-			es.log.Error("unmarshalling cheer event", "error", err.Error())
-			return
-		}
-		b, err := proto.Marshal(
-			&EventChannelCheer{
-				IsAnonymous: &event.IsAnonymous,
-				From: &EventUser{
-					Id:    event.UserID,
-					Login: event.UserLogin,
-					Name:  event.UserName,
-				},
-				Broadcaster: &EventUser{
-					Id:    event.BroadcasterUserID,
-					Login: event.BroadcasterUserLogin,
-					Name:  event.BroadcasterUserName,
-				},
-				Message: &event.Message,
-				Bits:    uint32(event.Bits),
-			})
-		if err != nil {
-			es.log.Error("marshalling cheer event proto", "error", err.Error())
-			return
-		}
-		es.bus.Send(
-			&bus.BusMessage{
-				Topic:   BusTopics_TWITCH_EVENTSUB_EVENT.String(),
-				Type:    int32(MessageTypeEventSub_TYPE_CHANNEL_CHEER),
-				Message: b,
-			})
+		msg = es.handleChannelCheer(n.Event)
 	case EventTypeFollow:
-		event := &helix.EventSubChannelFollowEvent{}
-		if err := json.Unmarshal(n.Event, event); err != nil {
-			es.log.Error("unmarshalling follow event", "error", err.Error())
-			return
-		}
-		b, err := proto.Marshal(&EventChannelFollow{
+		msg = es.handleChannelFollow(n.Event)
+	case EventTypeRaid:
+		msg = es.handleChannelRaid(n.Event)
+	default:
+		es.Log.Info("unhandled notification", "type", n.Subscription.Type)
+	}
+	if msg != nil {
+		es.bus.Send(msg)
+	}
+}
+
+func (es *eventSub) handleChannePointRedeem(eventJSON json.RawMessage) *bus.BusMessage {
+	msg := &bus.BusMessage{
+		Topic: topicEventSubEvent,
+		Type:  int32(MessageTypeEventSub_TYPE_CHANNEL_POINT_CUSTOM_REDEEM),
+	}
+	event := &helix.EventSubChannelPointsCustomRewardRedemptionEvent{}
+	if err := json.Unmarshal(eventJSON, event); err != nil {
+		es.Log.Error("unmarshalling follow event", "error", err.Error())
+		return nil
+	}
+	es.MarshalMessage(msg, &EventChannelPointsCustomRewardRedemption{
+		Id: event.ID,
+		Broadcaster: &EventUser{
+			Id:    event.BroadcasterUserID,
+			Login: event.BroadcasterUserLogin,
+			Name:  event.BroadcasterUserName,
+		},
+		User: &EventUser{
+			Id:    event.UserID,
+			Login: event.UserLogin,
+			Name:  event.UserName,
+		},
+		Input:  event.UserInput,
+		Status: event.Status,
+		Reward: &Reward{
+			Id:     event.Reward.ID,
+			Title:  event.Reward.Title,
+			Cost:   int32(event.Reward.Cost),
+			Prompt: event.Reward.Prompt,
+		},
+		RedeemedAt: event.RedeemedAt.Unix(),
+	})
+	if msg.Error != nil {
+		return nil
+	}
+	return msg
+
+}
+
+func (es *eventSub) handleChannelCheer(eventJSON json.RawMessage) *bus.BusMessage {
+	msg := &bus.BusMessage{
+		Topic: topicEventSubEvent,
+		Type:  int32(MessageTypeEventSub_TYPE_CHANNEL_CHEER),
+	}
+	event := &helix.EventSubChannelCheerEvent{}
+	if err := json.Unmarshal(eventJSON, event); err != nil {
+		es.Log.Error("unmarshalling follow event", "error", err.Error())
+		return nil
+	}
+	es.MarshalMessage(msg,
+		&EventChannelCheer{
+			IsAnonymous: &event.IsAnonymous,
+			From: &EventUser{
+				Id:    event.UserID,
+				Login: event.UserLogin,
+				Name:  event.UserName,
+			},
 			Broadcaster: &EventUser{
 				Id:    event.BroadcasterUserID,
 				Login: event.BroadcasterUserLogin,
 				Name:  event.BroadcasterUserName,
 			},
-			Follower: &EventUser{
-				Id:    event.UserID,
-				Login: event.UserLogin,
-				Name:  event.UserName,
-			},
-			At: event.FollowedAt.Unix(),
+			Message: &event.Message,
+			Bits:    uint32(event.Bits),
 		})
-		if err != nil {
-			es.log.Error("marshalling follow event proto", "error", err.Error())
-			return
-		}
-		es.bus.Send(
-			&bus.BusMessage{
-				Topic:   BusTopics_TWITCH_EVENTSUB_EVENT.String(),
-				Type:    int32(MessageTypeEventSub_TYPE_CHANNEL_FOLLOW),
-				Message: b,
-			})
-	case EventTypeRaid:
-		event := &helix.EventSubChannelRaidEvent{}
-		if err := json.Unmarshal(n.Event, event); err != nil {
-			es.log.Error("unmarshalling raid event", "error", err.Error())
-			return
-		}
-		b, err := proto.Marshal(&EventChannelRaid{
-			FromBroadcaster: &EventUser{
-				Id:    event.FromBroadcasterUserID,
-				Login: event.FromBroadcasterUserLogin,
-				Name:  event.FromBroadcasterUserName,
-			},
-			ToBroadcaster: &EventUser{
-				Id:    event.ToBroadcasterUserID,
-				Login: event.ToBroadcasterUserLogin,
-				Name:  event.ToBroadcasterUserName,
-			},
-			Viewers: uint32(event.Viewers),
-		})
-		if err != nil {
-			es.log.Error("marshalling raid event proto", "error", err.Error())
-			return
-		}
-		es.bus.Send(
-			&bus.BusMessage{
-				Topic:   BusTopics_TWITCH_EVENTSUB_EVENT.String(),
-				Type:    int32(MessageTypeEventSub_TYPE_CHANNEL_RAID),
-				Message: b,
-			})
-	default:
-		es.log.Info("unhandled notification", "type", n.Subscription.Type)
+	if msg.Error != nil {
+		return nil
 	}
+	return msg
+}
+
+func (es *eventSub) handleChannelFollow(eventJSON json.RawMessage) *bus.BusMessage {
+	msg := &bus.BusMessage{
+		Topic: topicEventSubEvent,
+		Type:  int32(MessageTypeEventSub_TYPE_CHANNEL_FOLLOW),
+	}
+	event := &helix.EventSubChannelFollowEvent{}
+	if err := json.Unmarshal(eventJSON, event); err != nil {
+		es.Log.Error("unmarshalling follow event", "error", err.Error())
+		return nil
+	}
+	es.MarshalMessage(msg, &EventChannelFollow{
+		Broadcaster: &EventUser{
+			Id:    event.BroadcasterUserID,
+			Login: event.BroadcasterUserLogin,
+			Name:  event.BroadcasterUserName,
+		},
+		Follower: &EventUser{
+			Id:    event.UserID,
+			Login: event.UserLogin,
+			Name:  event.UserName,
+		},
+		At: event.FollowedAt.Unix(),
+	})
+	if msg.Error != nil {
+		return nil
+	}
+	return msg
+}
+
+func (es *eventSub) handleChannelRaid(eventJSON json.RawMessage) *bus.BusMessage {
+	msg := &bus.BusMessage{
+		Topic: topicEventSubEvent,
+		Type:  int32(MessageTypeEventSub_TYPE_CHANNEL_RAID),
+	}
+	event := &helix.EventSubChannelRaidEvent{}
+	if err := json.Unmarshal(eventJSON, event); err != nil {
+		es.Log.Error("unmarshalling raid event", "error", err.Error())
+		return nil
+	}
+	ecr := &EventChannelRaid{
+		FromBroadcaster: &EventUser{
+			Id:    event.FromBroadcasterUserID,
+			Login: event.FromBroadcasterUserLogin,
+			Name:  event.FromBroadcasterUserName,
+		},
+		ToBroadcaster: &EventUser{
+			Id:    event.ToBroadcasterUserID,
+			Login: event.ToBroadcasterUserLogin,
+			Name:  event.ToBroadcasterUserName,
+		},
+		Viewers: uint32(event.Viewers),
+	}
+	if es.MarshalMessage(msg, ecr); msg.Error != nil {
+		return nil
+	}
+	return msg
 }
 
 func (es *eventSub) setStatus(status EventSubStatus, detail string) {
