@@ -15,8 +15,8 @@ enum MessageTypeCommand {
     TYPE_COMMAND_WRITE_PROFILE_RESP    = 4;
     TYPE_COMMAND_DELETE_PROFILE_REQ    = 5;
     TYPE_COMMAND_DELETE_PROFILE_RESP   = 6;
-    TYPE_COMMAND_IRC_SET_CONFIG_REQ    = 7;
-    TYPE_COMMAND_IRC_SET_CONFIG_RESP   = 8;
+    TYPE_COMMAND_CHAT_SET_CONFIG_REQ   = 7;
+    TYPE_COMMAND_CHAT_SET_CONFIG_RESP  = 8;
     TYPE_COMMAND_EVENT_SET_CONFIG_REQ  = 9;
     TYPE_COMMAND_EVENT_SET_CONFIG_RESP = 10;
 
@@ -44,9 +44,9 @@ message Profile {
 }
 
 message Config {
-    map<string,Profile>  profiles   = 1;
-    IRCConfig            irc_config = 2;
-    EventSubConfig       es_config  = 3;
+    map<string,Profile>  profiles    = 1;
+    ChatConfig           chat_config = 2;
+    EventSubConfig       es_config   = 3;
 }
 
 message GetOAuthURLRequest {}
@@ -64,10 +64,10 @@ message DeleteProfileRequest {
 }
 message DeleteProfileResponse {}
 
-message IRCSetConfigRequest {
-    IRCConfig  config = 1;
+message ChatSetConfigRequest {
+    ChatConfig  config = 1;
 }
-message IRCSetConfigResponse {}
+message ChatSetConfigResponse {}
 
 message EventSubSetConfigRequest {
     EventSubConfig  config = 1;

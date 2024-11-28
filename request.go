@@ -26,10 +26,8 @@ func (t *Twitch) handleRequest(ctx context.Context) error {
 			reply = t.handleRequestListProfiles(msg)
 		case int32(MessageTypeRequest_TYPE_REQUEST_GET_USER_REQ):
 			reply = t.handleRequestGetUser(msg)
-		case int32(MessageTypeRequest_TYPE_REQUEST_IRC_GET_CONFIG_REQ):
-			reply = t.handleIRCGetConfigRequest(msg)
-		case int32(MessageTypeRequest_TYPE_REQUEST_IRC_GET_STATUS_REQ):
-			reply = t.handleIRCGetStatusRequest(msg)
+		case int32(MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_REQ):
+			reply = t.handleChatGetConfigRequest(msg)
 		case int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_REQ):
 			reply = t.handleEventSubGetConfigRequest(msg)
 		case int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_REQ):
@@ -43,40 +41,35 @@ func (t *Twitch) handleRequest(ctx context.Context) error {
 }
 
 func (t *Twitch) handleRequestListProfiles(reqMsg *bus.BusMessage) *bus.BusMessage {
+	reply := &bus.BusMessage{
+		Topic: reqMsg.GetTopic(),
+		Type:  reqMsg.GetType() + 1,
+	}
 	t.lock.Lock()
 	defer t.lock.Unlock()
 	lpr := &ListProfilesResponse{}
 	for profileName := range t.cfg.Profiles {
 		lpr.Names = append(lpr.Names, profileName)
 	}
-	b, err := proto.Marshal(lpr)
-	if err != nil {
-		t.log.Error("marshalling", "type", "ListProfilesResponse", "error", err.Error())
-		return nil
-	}
-	return &bus.BusMessage{
-		Topic:   reqMsg.GetTopic(),
-		Type:    int32(MessageTypeRequest_TYPE_REQUEST_LIST_PROFILES_RESP),
-		Message: b,
-	}
+	t.MarshalMessage(reply, lpr)
+	return reply
 }
 
 func (t *Twitch) handleRequestGetUser(reqMsg *bus.BusMessage) *bus.BusMessage {
-	gur := &GetUserRequest{}
-	if err := proto.Unmarshal(reqMsg.GetMessage(), gur); err != nil {
-		t.log.Error("unmarshalling", "type", "GetUserRequest", "error", err.Error())
-		return nil
-	}
-	resp := &bus.BusMessage{
+	reply := &bus.BusMessage{
 		Topic: reqMsg.GetTopic(),
-		Type:  int32(MessageTypeRequest_TYPE_REQUEST_GET_USER_RESP),
+		Type:  reqMsg.GetType() + 1,
+	}
+	gur := &GetUserRequest{}
+	if reply.Error = t.UnmarshalMessage(reply, gur); reply.Error != nil {
+		return reply
 	}
 	t.lock.Lock()
 	client, present := t.clients[gur.Profile]
 	t.lock.Unlock()
 	if !present {
-		resp.Error = errInvalidClient
-		return resp
+		reply.Error = errInvalidClient
+		return reply
 	}
 
 	guResp := &GetUserResponse{
@@ -91,17 +84,17 @@ func (t *Twitch) handleRequestGetUser(reqMsg *bus.BusMessage) *bus.BusMessage {
 		uResp, err := client.GetUsers(&helix.UsersParams{Logins: []string{login}})
 		err = extractError(err, uResp.ResponseCommon)
 		if err != nil {
-			resp.Error = &bus.Error{
+			reply.Error = &bus.Error{
 				Detail:         proto.String(err.Error()),
 				NotCommonError: true,
 			}
-			return resp
+			return reply
 		}
 		if len(uResp.Data.Users) == 0 {
-			resp.Error = &bus.Error{
+			reply.Error = &bus.Error{
 				Code: int32(bus.CommonErrorCode_NOT_FOUND),
 			}
-			return resp
+			return reply
 		}
 		user = &User{
 			Id:              uResp.Data.Users[0].ID,
@@ -120,76 +113,40 @@ func (t *Twitch) handleRequestGetUser(reqMsg *bus.BusMessage) *bus.BusMessage {
 		guResp.User = user
 	}
 
-	b, err := proto.Marshal(guResp)
-	if err == nil {
-		resp.Message = b
-	} else {
-		resp.Error = &bus.Error{}
-		t.log.Error("marshalling", "type", "GetUserResponse")
-	}
-	return resp
+	t.MarshalMessage(reply, guResp)
+	return reply
 }
 
-func (t *Twitch) handleIRCGetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
-	cfg := &IRCConfig{}
-	if t.cfg != nil && t.cfg.IrcConfig != nil {
+func (t *Twitch) handleChatGetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
+	reply := &bus.BusMessage{
+		Topic: reqMsg.Topic,
+		Type:  int32(MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_RESP),
+	}
+	cfg := &ChatConfig{}
+	if t.cfg != nil && t.cfg.ChatConfig != nil {
 		t.lock.Lock()
-		cfg = t.cfg.IrcConfig
+		cfg = t.cfg.ChatConfig
 		t.lock.Unlock()
 	}
-	b, err := proto.Marshal(&IRCGetConfigResponse{
-		Config: cfg,
-	})
-	resp := &bus.BusMessage{
-		Topic: reqMsg.Topic,
-		Type:  int32(MessageTypeRequest_TYPE_REQUEST_IRC_GET_CONFIG_RESP),
-	}
-	if err != nil {
-		t.log.Error("marshalling", "type", "IRCGetConfigResponse", "error", err.Error())
-		resp.Error = &bus.Error{
-			Detail: proto.String("marshalling IRCGetConfigResponse: " + err.Error()),
-		}
-		return resp
-	}
-	resp.Message = b
-	return resp
-}
-
-func (t *Twitch) handleIRCGetStatusRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
-	b, _ := proto.Marshal(&IRCGetStatusResponse{
-		Status: t.chat.status,
-		Detail: t.chat.statusDetail,
-	})
-	return &bus.BusMessage{
-		Topic:   reqMsg.Topic,
-		Type:    int32(MessageTypeRequest_TYPE_REQUEST_IRC_GET_STATUS_RESP),
-		Message: b,
-	}
+	t.MarshalMessage(reply, &ChatGetConfigResponse{Config: cfg})
+	return reply
 }
 
 func (t *Twitch) handleEventSubGetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
+	reply := &bus.BusMessage{
+		Topic: reqMsg.GetTopic(),
+		Type:  reqMsg.GetType() + 1,
+	}
 	cfg := &EventSubConfig{}
 	if t.cfg != nil && t.cfg.EsConfig != nil {
 		t.lock.Lock()
 		cfg = t.cfg.EsConfig
 		t.lock.Unlock()
 	}
-	b, err := proto.Marshal(&EventSubGetConfigResponse{
+	t.MarshalMessage(reply, &EventSubGetConfigResponse{
 		Config: cfg,
 	})
-	resp := &bus.BusMessage{
-		Topic: reqMsg.Topic,
-		Type:  int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_RESP),
-	}
-	if err != nil {
-		t.log.Error("marshalling", "type", "EventSubGetConfigResponse", "error", err.Error())
-		resp.Error = &bus.Error{
-			Detail: proto.String("marshalling EventSubGetConfigResponse: " + err.Error()),
-		}
-		return resp
-	}
-	resp.Message = b
-	return resp
+	return reply
 }
 
 func (t *Twitch) handleEventSubGetStatusRequest(reqMsg *bus.BusMessage) *bus.BusMessage {

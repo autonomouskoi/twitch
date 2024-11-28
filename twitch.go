@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"sync"
 	"time"
@@ -24,7 +23,7 @@ import (
 )
 
 const (
-	EnvLocalContentPath = "TWITCH_WEB_CONTENT"
+	EnvLocalContentPath = "AK_CONTENT_TWITCH"
 
 	clientID = "zqciq1diwsv0xqizn7m2gxbke6ez2v"
 )
@@ -67,16 +66,15 @@ func init() {
 
 type Twitch struct {
 	http.Handler
+	modutil.ModuleBase
 	bus     *bus.Bus
 	lock    sync.Mutex
-	log     *slog.Logger
 	kv      *kv.KVPrefix
 	cfg     *Config
 	clients map[string]*client
 
 	cacheUsers ttlcache.Cache[string, *User]
 
-	chat     *chat
 	eventSub *eventSub
 }
 
@@ -84,15 +82,10 @@ type Twitch struct {
 var webZip []byte
 
 func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
-	t.log = deps.Log
+	t.Log = deps.Log
 	t.bus = deps.Bus
 	t.kv = &deps.KV
 	t.clients = map[string]*client{}
-	t.chat = &chat{
-		bus:       deps.Bus,
-		log:       deps.Log.With("module", "twitchchat"),
-		parentCtx: ctx,
-	}
 	t.eventSub = &eventSub{
 		bus:       deps.Bus,
 		parentCtx: ctx,
@@ -118,7 +111,7 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 		if err := t.addProfile(profile); err != nil {
 			return fmt.Errorf("adding profile %s: %w", name, err)
 		}
-		t.log.Debug("loaded profile", "name", name)
+		t.Log.Debug("loaded profile", "name", name)
 	}
 
 	eg, ctx := errgroup.WithContext(ctx)
@@ -133,7 +126,7 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 
 func (t *Twitch) writeCfg() {
 	if err := t.kv.SetProto(cfgKVKey, t.cfg); err != nil {
-		t.log.Error("writing config", "error", err.Error())
+		t.Log.Error("writing config", "error", err.Error())
 	}
 }
 

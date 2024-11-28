@@ -15,6 +15,7 @@ import (
 
 	"github.com/autonomouskoi/akcore/bus"
 	"github.com/autonomouskoi/akcore/modules/modutil"
+	"github.com/autonomouskoi/datastruct/slices"
 )
 
 const (
@@ -119,6 +120,10 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 	}
 	es.Log.Debug("got welcome", "msg", *welcome.Session)
 	es.setStatus(EventSubStatus_EVENT_SUB_STATUS_CONNECTED, "Connected!")
+	transport := helix.EventSubTransport{
+		Method:    callbackMethod,
+		SessionID: welcome.Session.ID,
+	}
 
 	for eventType, eventVersion := range map[string]string{
 		EventTypeChannelPointRedeem: EventVersionChannelPointRedeem,
@@ -134,10 +139,7 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 			Condition: helix.EventSubCondition{
 				BroadcasterUserID: es.twitch.UserID(),
 			},
-			Transport: helix.EventSubTransport{
-				Method:    callbackMethod,
-				SessionID: welcome.Session.ID,
-			},
+			Transport: transport,
 		})
 		if err != nil {
 			return fmt.Errorf("creating %s/%s sub: %w", eventType, eventVersion, err)
@@ -149,10 +151,7 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 		Condition: helix.EventSubCondition{
 			ToBroadcasterUserID: es.twitch.UserID(),
 		},
-		Transport: helix.EventSubTransport{
-			Method:    callbackMethod,
-			SessionID: welcome.Session.ID,
-		},
+		Transport: transport,
 	})
 	if err != nil {
 		return fmt.Errorf("creating %s/%s sub: %w", EventTypeRaid, EventVersionRaid, err)
@@ -164,13 +163,22 @@ func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
 			BroadcasterUserID: es.twitch.UserID(),
 			ModeratorUserID:   es.twitch.UserID(),
 		},
-		Transport: helix.EventSubTransport{
-			Method:    callbackMethod,
-			SessionID: welcome.Session.ID,
-		},
+		Transport: transport,
 	})
 	if err != nil {
-		return fmt.Errorf("creating %s/%s sub: %w", EventTypeRaid, EventVersionRaid, err)
+		return fmt.Errorf("creating %s/%s sub: %w", EventTypeFollow, EventVersionFollow, err)
+	}
+	_, err = es.twitch.CreateEventSubSubscription(&helix.EventSubSubscription{
+		Type:    helix.EventSubTypeChannelChatMessage,
+		Version: EventVersionChannelChatMessage,
+		Condition: helix.EventSubCondition{
+			BroadcasterUserID: es.twitch.UserID(),
+			UserID:            es.twitch.UserID(),
+		},
+		Transport: transport,
+	})
+	if err != nil {
+		return fmt.Errorf("creating %s/%s sub: %w", helix.EventSubTypeChannelChatMessage, EventVersionChannelChatMessage, err)
 	}
 	es.c = c
 	return nil
@@ -251,6 +259,8 @@ func (es *eventSub) handleLoop(ctx context.Context) {
 func (es *eventSub) handleNotification(n *Notification) {
 	var msg *bus.BusMessage
 	switch n.Subscription.Type {
+	case helix.EventSubTypeChannelChatMessage:
+		msg = es.handleChannelChatMessage(n.Event)
 	case EventTypeChannelPointRedeem:
 		msg = es.handleChannePointRedeem(n.Event)
 	case EventTypeCheer:
@@ -267,6 +277,126 @@ func (es *eventSub) handleNotification(n *Notification) {
 	}
 }
 
+func (es *eventSub) handleChannelChatMessage(eventJSON json.RawMessage) *bus.BusMessage {
+	msg := &bus.BusMessage{
+		Topic: BusTopics_TWITCH_EVENTSUB_EVENT.String(),
+		Type:  int32(MessageTypeEventSub_TYPE_CHANNEL_CHAT_MESSAGE),
+	}
+	event := &helix.EventSubChannelChatMessageEvent{}
+	if err := json.Unmarshal(eventJSON, event); err != nil {
+		es.Log.Error("unmarshalling chat message event", "error", err.Error())
+		return nil
+	}
+	ecm := &EventChannelChatMessage{
+		Id: event.MessageID,
+		Broadcaster: &EventUser{
+			Id:    event.BroadcasterUserID,
+			Login: event.BroadcasterUserLogin,
+			Name:  event.BroadcasterUserName,
+		},
+		Chatter: &EventUser{
+			Id:    event.ChatterUserID,
+			Login: event.ChatterUserLogin,
+			Name:  event.ChatterUserName,
+		},
+		Message: &ChatMessage{
+			Text: event.Message.Text,
+			Fragments: slices.Map(event.Message.Fragments,
+				func(in helix.EventSubChatMessageFragment) *ChatMessageFragment {
+					cmf := &ChatMessageFragment{
+						Text: in.Text,
+					}
+					switch in.Type {
+					case helix.EventSubChatMessageFragmentTypeText:
+						cmf.Type = ChatMessageFragmentType_text
+					case helix.EventSubChatMessageFragmentTypeCheermote:
+						cmf.Type = ChatMessageFragmentType_cheermote
+						cmf.Cheermote = &ChatMessageCheermote{
+							Prefix: in.Cheermote.Prefix,
+							Bits:   in.Cheermote.Bits,
+							Tier:   int32(in.Cheermote.Tier),
+						}
+					case helix.EventSubChatMessageFragmentTypeEmote:
+						cmf.Type = ChatMessageFragmentType_emote
+						cmf.Emote = &ChatMessageEmote{
+							Id:         in.Emote.ID,
+							EmoteSetId: in.Emote.EmoteSetID,
+							OwnerId:    in.Emote.OwnerID,
+							Format:     in.Emote.Format,
+						}
+					case helix.EventSubChatMessageFragmentTypeMention:
+						cmf.Type = ChatMessageFragmentType_mention
+						cmf.Mention = &EventUser{
+							Id:    in.Mention.UserID,
+							Login: in.Mention.UserLogin,
+							Name:  in.Mention.UserName,
+						}
+					}
+					return cmf
+				}),
+		},
+		MessageType: func(t helix.EventSubChatMessageType) ChatMessageType {
+			switch t {
+			case helix.EventSubChatMessageTypeText:
+				return ChatMessageType_chat_message_type_text
+			case helix.EventSubChatMessageTypeChannelPointsHighlighted:
+				return ChatMessageType_chat_message_type_channel_points_highlighted
+			case helix.EventSubChatMessageTypeChannelPointsSubOnly:
+				return ChatMessageType_chat_message_type_channel_points_sub_only
+			case helix.EventSubChatMessageTypeUserIntro:
+				return ChatMessageType_chat_message_type_user_intro
+			}
+			return -1
+		}(event.MessageType),
+		Badges: slices.Map(event.Badges, func(badge helix.EventSubChatBadge) *ChatBadge {
+			return &ChatBadge{
+				SetId: badge.SetID,
+				Id:    badge.ID,
+				Info:  badge.Info,
+			}
+		}),
+		Cheer: func(cheer helix.EventSubChatMessageCheer) *ChatMessageCheer {
+			if cheer.Bits == 0 {
+				return nil
+			}
+			return &ChatMessageCheer{Bits: cheer.Bits}
+		}(event.Cheer),
+		Color: event.Color,
+		Reply: func(reply helix.EventSubChatMessageReply) *ChatMessageReply {
+			if reply.ParentMessageID == "" {
+				return nil
+			}
+			return &ChatMessageReply{
+				ParentMessageId:   event.Reply.ParentMessageID,
+				ParentMessageBody: event.Reply.ParentMessageBody,
+				ParentUser: &EventUser{
+					Id:    event.Reply.ParentUserID,
+					Login: event.Reply.ParentUserLogin,
+					Name:  event.Reply.ParentUserName,
+				},
+				ThreadMessageId: event.Reply.ThreadMessageID,
+				ThreadUser: &EventUser{
+					Id:    event.Reply.ThreadUserID,
+					Login: event.Reply.ThreadUserLogin,
+					Name:  event.Reply.ThreadUserName,
+				},
+			}
+		}(event.Reply),
+		ChannelPointsCustomRewardId: event.ChannelPointsCustomRewardID,
+		Enrichments: &EventChannelChatMessage_Enrichments{
+			IsMod: slices.Matches(event.Badges, func(b helix.EventSubChatBadge) bool {
+				return b.SetID == "broadcaster" || b.SetID == "moderator"
+			}),
+		},
+	}
+
+	es.MarshalMessage(msg, ecm)
+	if msg.Error != nil {
+		return nil
+	}
+	return msg
+}
+
 func (es *eventSub) handleChannePointRedeem(eventJSON json.RawMessage) *bus.BusMessage {
 	msg := &bus.BusMessage{
 		Topic: topicEventSubEvent,
@@ -274,7 +404,7 @@ func (es *eventSub) handleChannePointRedeem(eventJSON json.RawMessage) *bus.BusM
 	}
 	event := &helix.EventSubChannelPointsCustomRewardRedemptionEvent{}
 	if err := json.Unmarshal(eventJSON, event); err != nil {
-		es.Log.Error("unmarshalling follow event", "error", err.Error())
+		es.Log.Error("unmarshalling channel point redeem event", "error", err.Error())
 		return nil
 	}
 	es.MarshalMessage(msg, &EventChannelPointsCustomRewardRedemption{
@@ -303,7 +433,6 @@ func (es *eventSub) handleChannePointRedeem(eventJSON json.RawMessage) *bus.BusM
 		return nil
 	}
 	return msg
-
 }
 
 func (es *eventSub) handleChannelCheer(eventJSON json.RawMessage) *bus.BusMessage {
@@ -313,7 +442,7 @@ func (es *eventSub) handleChannelCheer(eventJSON json.RawMessage) *bus.BusMessag
 	}
 	event := &helix.EventSubChannelCheerEvent{}
 	if err := json.Unmarshal(eventJSON, event); err != nil {
-		es.Log.Error("unmarshalling follow event", "error", err.Error())
+		es.Log.Error("unmarshalling cheer event", "error", err.Error())
 		return nil
 	}
 	es.MarshalMessage(msg,
