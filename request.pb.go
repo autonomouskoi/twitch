@@ -26,16 +26,14 @@ const (
 	MessageTypeRequest_TYPE_REQUEST_UNSPECIFIED           MessageTypeRequest = 0
 	MessageTypeRequest_TYPE_REQUEST_LIST_PROFILES_REQ     MessageTypeRequest = 1
 	MessageTypeRequest_TYPE_REQUEST_LIST_PROFILES_RESP    MessageTypeRequest = 2
-	MessageTypeRequest_TYPE_REQUEST_IRC_GET_CONFIG_REQ    MessageTypeRequest = 3
-	MessageTypeRequest_TYPE_REQUEST_IRC_GET_CONFIG_RESP   MessageTypeRequest = 4
-	MessageTypeRequest_TYPE_REQUEST_IRC_GET_STATUS_REQ    MessageTypeRequest = 5
-	MessageTypeRequest_TYPE_REQUEST_IRC_GET_STATUS_RESP   MessageTypeRequest = 6
-	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_REQ  MessageTypeRequest = 7
-	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_RESP MessageTypeRequest = 8
-	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_REQ  MessageTypeRequest = 9
-	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_RESP MessageTypeRequest = 10
-	MessageTypeRequest_TYPE_REQUEST_GET_USER_REQ          MessageTypeRequest = 11
-	MessageTypeRequest_TYPE_REQUEST_GET_USER_RESP         MessageTypeRequest = 12
+	MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_REQ   MessageTypeRequest = 3
+	MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_RESP  MessageTypeRequest = 4
+	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_REQ  MessageTypeRequest = 5
+	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_RESP MessageTypeRequest = 6
+	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_REQ  MessageTypeRequest = 7
+	MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_RESP MessageTypeRequest = 8
+	MessageTypeRequest_TYPE_REQUEST_GET_USER_REQ          MessageTypeRequest = 9
+	MessageTypeRequest_TYPE_REQUEST_GET_USER_RESP         MessageTypeRequest = 10
 )
 
 // Enum value maps for MessageTypeRequest.
@@ -44,31 +42,27 @@ var (
 		0:  "TYPE_REQUEST_UNSPECIFIED",
 		1:  "TYPE_REQUEST_LIST_PROFILES_REQ",
 		2:  "TYPE_REQUEST_LIST_PROFILES_RESP",
-		3:  "TYPE_REQUEST_IRC_GET_CONFIG_REQ",
-		4:  "TYPE_REQUEST_IRC_GET_CONFIG_RESP",
-		5:  "TYPE_REQUEST_IRC_GET_STATUS_REQ",
-		6:  "TYPE_REQUEST_IRC_GET_STATUS_RESP",
-		7:  "TYPE_REQUEST_EVENT_GET_CONFIG_REQ",
-		8:  "TYPE_REQUEST_EVENT_GET_CONFIG_RESP",
-		9:  "TYPE_REQUEST_EVENT_GET_STATUS_REQ",
-		10: "TYPE_REQUEST_EVENT_GET_STATUS_RESP",
-		11: "TYPE_REQUEST_GET_USER_REQ",
-		12: "TYPE_REQUEST_GET_USER_RESP",
+		3:  "TYPE_REQUEST_CHAT_GET_CONFIG_REQ",
+		4:  "TYPE_REQUEST_CHAT_GET_CONFIG_RESP",
+		5:  "TYPE_REQUEST_EVENT_GET_CONFIG_REQ",
+		6:  "TYPE_REQUEST_EVENT_GET_CONFIG_RESP",
+		7:  "TYPE_REQUEST_EVENT_GET_STATUS_REQ",
+		8:  "TYPE_REQUEST_EVENT_GET_STATUS_RESP",
+		9:  "TYPE_REQUEST_GET_USER_REQ",
+		10: "TYPE_REQUEST_GET_USER_RESP",
 	}
 	MessageTypeRequest_value = map[string]int32{
 		"TYPE_REQUEST_UNSPECIFIED":           0,
 		"TYPE_REQUEST_LIST_PROFILES_REQ":     1,
 		"TYPE_REQUEST_LIST_PROFILES_RESP":    2,
-		"TYPE_REQUEST_IRC_GET_CONFIG_REQ":    3,
-		"TYPE_REQUEST_IRC_GET_CONFIG_RESP":   4,
-		"TYPE_REQUEST_IRC_GET_STATUS_REQ":    5,
-		"TYPE_REQUEST_IRC_GET_STATUS_RESP":   6,
-		"TYPE_REQUEST_EVENT_GET_CONFIG_REQ":  7,
-		"TYPE_REQUEST_EVENT_GET_CONFIG_RESP": 8,
-		"TYPE_REQUEST_EVENT_GET_STATUS_REQ":  9,
-		"TYPE_REQUEST_EVENT_GET_STATUS_RESP": 10,
-		"TYPE_REQUEST_GET_USER_REQ":          11,
-		"TYPE_REQUEST_GET_USER_RESP":         12,
+		"TYPE_REQUEST_CHAT_GET_CONFIG_REQ":   3,
+		"TYPE_REQUEST_CHAT_GET_CONFIG_RESP":  4,
+		"TYPE_REQUEST_EVENT_GET_CONFIG_REQ":  5,
+		"TYPE_REQUEST_EVENT_GET_CONFIG_RESP": 6,
+		"TYPE_REQUEST_EVENT_GET_STATUS_REQ":  7,
+		"TYPE_REQUEST_EVENT_GET_STATUS_RESP": 8,
+		"TYPE_REQUEST_GET_USER_REQ":          9,
+		"TYPE_REQUEST_GET_USER_RESP":         10,
 	}
 )
 
@@ -184,14 +178,14 @@ func (x *ListProfilesResponse) GetNames() []string {
 	return nil
 }
 
-type IRCGetConfigRequest struct {
+type ChatGetConfigRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *IRCGetConfigRequest) Reset() {
-	*x = IRCGetConfigRequest{}
+func (x *ChatGetConfigRequest) Reset() {
+	*x = ChatGetConfigRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_request_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -199,13 +193,13 @@ func (x *IRCGetConfigRequest) Reset() {
 	}
 }
 
-func (x *IRCGetConfigRequest) String() string {
+func (x *ChatGetConfigRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IRCGetConfigRequest) ProtoMessage() {}
+func (*ChatGetConfigRequest) ProtoMessage() {}
 
-func (x *IRCGetConfigRequest) ProtoReflect() protoreflect.Message {
+func (x *ChatGetConfigRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_request_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -217,21 +211,21 @@ func (x *IRCGetConfigRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IRCGetConfigRequest.ProtoReflect.Descriptor instead.
-func (*IRCGetConfigRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ChatGetConfigRequest.ProtoReflect.Descriptor instead.
+func (*ChatGetConfigRequest) Descriptor() ([]byte, []int) {
 	return file_request_proto_rawDescGZIP(), []int{2}
 }
 
-type IRCGetConfigResponse struct {
+type ChatGetConfigResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Config *IRCConfig `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Config *ChatConfig `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
 }
 
-func (x *IRCGetConfigResponse) Reset() {
-	*x = IRCGetConfigResponse{}
+func (x *ChatGetConfigResponse) Reset() {
+	*x = ChatGetConfigResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_request_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -239,13 +233,13 @@ func (x *IRCGetConfigResponse) Reset() {
 	}
 }
 
-func (x *IRCGetConfigResponse) String() string {
+func (x *ChatGetConfigResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IRCGetConfigResponse) ProtoMessage() {}
+func (*ChatGetConfigResponse) ProtoMessage() {}
 
-func (x *IRCGetConfigResponse) ProtoReflect() protoreflect.Message {
+func (x *ChatGetConfigResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_request_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -257,109 +251,16 @@ func (x *IRCGetConfigResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IRCGetConfigResponse.ProtoReflect.Descriptor instead.
-func (*IRCGetConfigResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ChatGetConfigResponse.ProtoReflect.Descriptor instead.
+func (*ChatGetConfigResponse) Descriptor() ([]byte, []int) {
 	return file_request_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *IRCGetConfigResponse) GetConfig() *IRCConfig {
+func (x *ChatGetConfigResponse) GetConfig() *ChatConfig {
 	if x != nil {
 		return x.Config
 	}
 	return nil
-}
-
-type IRCGetStatusRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-}
-
-func (x *IRCGetStatusRequest) Reset() {
-	*x = IRCGetStatusRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *IRCGetStatusRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IRCGetStatusRequest) ProtoMessage() {}
-
-func (x *IRCGetStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IRCGetStatusRequest.ProtoReflect.Descriptor instead.
-func (*IRCGetStatusRequest) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{4}
-}
-
-type IRCGetStatusResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Status ChatStatus `protobuf:"varint,1,opt,name=status,proto3,enum=twitch.ChatStatus" json:"status,omitempty"`
-	Detail string     `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
-}
-
-func (x *IRCGetStatusResponse) Reset() {
-	*x = IRCGetStatusResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *IRCGetStatusResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IRCGetStatusResponse) ProtoMessage() {}
-
-func (x *IRCGetStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IRCGetStatusResponse.ProtoReflect.Descriptor instead.
-func (*IRCGetStatusResponse) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *IRCGetStatusResponse) GetStatus() ChatStatus {
-	if x != nil {
-		return x.Status
-	}
-	return ChatStatus_CHAT_STATUS_UNKNOWN
-}
-
-func (x *IRCGetStatusResponse) GetDetail() string {
-	if x != nil {
-		return x.Detail
-	}
-	return ""
 }
 
 type EventSubGetConfigRequest struct {
@@ -371,7 +272,7 @@ type EventSubGetConfigRequest struct {
 func (x *EventSubGetConfigRequest) Reset() {
 	*x = EventSubGetConfigRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[6]
+		mi := &file_request_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -384,7 +285,7 @@ func (x *EventSubGetConfigRequest) String() string {
 func (*EventSubGetConfigRequest) ProtoMessage() {}
 
 func (x *EventSubGetConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[6]
+	mi := &file_request_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -397,7 +298,7 @@ func (x *EventSubGetConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventSubGetConfigRequest.ProtoReflect.Descriptor instead.
 func (*EventSubGetConfigRequest) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{6}
+	return file_request_proto_rawDescGZIP(), []int{4}
 }
 
 type EventSubGetConfigResponse struct {
@@ -411,7 +312,7 @@ type EventSubGetConfigResponse struct {
 func (x *EventSubGetConfigResponse) Reset() {
 	*x = EventSubGetConfigResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[7]
+		mi := &file_request_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -424,7 +325,7 @@ func (x *EventSubGetConfigResponse) String() string {
 func (*EventSubGetConfigResponse) ProtoMessage() {}
 
 func (x *EventSubGetConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[7]
+	mi := &file_request_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,7 +338,7 @@ func (x *EventSubGetConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventSubGetConfigResponse.ProtoReflect.Descriptor instead.
 func (*EventSubGetConfigResponse) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{7}
+	return file_request_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *EventSubGetConfigResponse) GetConfig() *EventSubConfig {
@@ -456,7 +357,7 @@ type EventSubGetStatusRequest struct {
 func (x *EventSubGetStatusRequest) Reset() {
 	*x = EventSubGetStatusRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[8]
+		mi := &file_request_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -469,7 +370,7 @@ func (x *EventSubGetStatusRequest) String() string {
 func (*EventSubGetStatusRequest) ProtoMessage() {}
 
 func (x *EventSubGetStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[8]
+	mi := &file_request_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -482,7 +383,7 @@ func (x *EventSubGetStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventSubGetStatusRequest.ProtoReflect.Descriptor instead.
 func (*EventSubGetStatusRequest) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{8}
+	return file_request_proto_rawDescGZIP(), []int{6}
 }
 
 type EventSubGetStatusResponse struct {
@@ -497,7 +398,7 @@ type EventSubGetStatusResponse struct {
 func (x *EventSubGetStatusResponse) Reset() {
 	*x = EventSubGetStatusResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[9]
+		mi := &file_request_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -510,7 +411,7 @@ func (x *EventSubGetStatusResponse) String() string {
 func (*EventSubGetStatusResponse) ProtoMessage() {}
 
 func (x *EventSubGetStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[9]
+	mi := &file_request_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -523,7 +424,7 @@ func (x *EventSubGetStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventSubGetStatusResponse.ProtoReflect.Descriptor instead.
 func (*EventSubGetStatusResponse) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{9}
+	return file_request_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *EventSubGetStatusResponse) GetStatus() EventSubStatus {
@@ -551,7 +452,7 @@ type GetAvatarPathRequest struct {
 func (x *GetAvatarPathRequest) Reset() {
 	*x = GetAvatarPathRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[10]
+		mi := &file_request_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -564,7 +465,7 @@ func (x *GetAvatarPathRequest) String() string {
 func (*GetAvatarPathRequest) ProtoMessage() {}
 
 func (x *GetAvatarPathRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[10]
+	mi := &file_request_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -577,7 +478,7 @@ func (x *GetAvatarPathRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAvatarPathRequest.ProtoReflect.Descriptor instead.
 func (*GetAvatarPathRequest) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{10}
+	return file_request_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetAvatarPathRequest) GetLogin() string {
@@ -599,7 +500,7 @@ type GetAvatarPathResponse struct {
 func (x *GetAvatarPathResponse) Reset() {
 	*x = GetAvatarPathResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[11]
+		mi := &file_request_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -612,7 +513,7 @@ func (x *GetAvatarPathResponse) String() string {
 func (*GetAvatarPathResponse) ProtoMessage() {}
 
 func (x *GetAvatarPathResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[11]
+	mi := &file_request_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -625,7 +526,7 @@ func (x *GetAvatarPathResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAvatarPathResponse.ProtoReflect.Descriptor instead.
 func (*GetAvatarPathResponse) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{11}
+	return file_request_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetAvatarPathResponse) GetLogin() string {
@@ -654,7 +555,7 @@ type GetUserRequest struct {
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[12]
+		mi := &file_request_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -667,7 +568,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[12]
+	mi := &file_request_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -680,7 +581,7 @@ func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
 func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{12}
+	return file_request_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetUserRequest) GetProfile() string {
@@ -709,7 +610,7 @@ type GetUserResponse struct {
 func (x *GetUserResponse) Reset() {
 	*x = GetUserResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_request_proto_msgTypes[13]
+		mi := &file_request_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -722,7 +623,7 @@ func (x *GetUserResponse) String() string {
 func (*GetUserResponse) ProtoMessage() {}
 
 func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_request_proto_msgTypes[13]
+	mi := &file_request_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +636,7 @@ func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserResponse.ProtoReflect.Descriptor instead.
 func (*GetUserResponse) Descriptor() ([]byte, []int) {
-	return file_request_proto_rawDescGZIP(), []int{13}
+	return file_request_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetUserResponse) GetLogin() string {
@@ -763,20 +664,13 @@ var file_request_proto_rawDesc = []byte{
 	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x2c, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74,
 	0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
 	0x12, 0x14, 0x0a, 0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52,
-	0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x22, 0x15, 0x0a, 0x13, 0x49, 0x52, 0x43, 0x47, 0x65, 0x74,
-	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x41, 0x0a,
-	0x14, 0x49, 0x52, 0x43, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x29, 0x0a, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x63, 0x68, 0x2e, 0x49,
-	0x52, 0x43, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67,
-	0x22, 0x15, 0x0a, 0x13, 0x49, 0x52, 0x43, 0x47, 0x65, 0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x5a, 0x0a, 0x14, 0x49, 0x52, 0x43, 0x47, 0x65,
-	0x74, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x2a, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x12, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x63, 0x68, 0x2e, 0x43, 0x68, 0x61, 0x74, 0x53, 0x74, 0x61,
-	0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x64,
-	0x65, 0x74, 0x61, 0x69, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x65, 0x74,
-	0x61, 0x69, 0x6c, 0x22, 0x1a, 0x0a, 0x18, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x47,
+	0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x22, 0x16, 0x0a, 0x14, 0x43, 0x68, 0x61, 0x74, 0x47, 0x65,
+	0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x43,
+	0x0a, 0x15, 0x43, 0x68, 0x61, 0x74, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2a, 0x0a, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x63, 0x68,
+	0x2e, 0x43, 0x68, 0x61, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x06, 0x63, 0x6f, 0x6e,
+	0x66, 0x69, 0x67, 0x22, 0x1a, 0x0a, 0x18, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x47,
 	0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22,
 	0x4b, 0x0a, 0x19, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x53, 0x75, 0x62, 0x47, 0x65, 0x74, 0x43, 0x6f,
 	0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2e, 0x0a, 0x06,
@@ -806,7 +700,7 @@ var file_request_proto_rawDesc = []byte{
 	0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x6f, 0x67, 0x69, 0x6e, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x05, 0x6c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x20, 0x0a, 0x04, 0x75, 0x73, 0x65,
 	0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x74, 0x77, 0x69, 0x74, 0x63, 0x68,
-	0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x2a, 0xee, 0x03, 0x0a, 0x12,
+	0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x2a, 0xa5, 0x03, 0x0a, 0x12,
 	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x12, 0x1c, 0x0a, 0x18, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45,
 	0x53, 0x54, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00,
@@ -814,33 +708,28 @@ var file_request_proto_rawDesc = []byte{
 	0x5f, 0x4c, 0x49, 0x53, 0x54, 0x5f, 0x50, 0x52, 0x4f, 0x46, 0x49, 0x4c, 0x45, 0x53, 0x5f, 0x52,
 	0x45, 0x51, 0x10, 0x01, 0x12, 0x23, 0x0a, 0x1f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51,
 	0x55, 0x45, 0x53, 0x54, 0x5f, 0x4c, 0x49, 0x53, 0x54, 0x5f, 0x50, 0x52, 0x4f, 0x46, 0x49, 0x4c,
-	0x45, 0x53, 0x5f, 0x52, 0x45, 0x53, 0x50, 0x10, 0x02, 0x12, 0x23, 0x0a, 0x1f, 0x54, 0x59, 0x50,
-	0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x49, 0x52, 0x43, 0x5f, 0x47, 0x45,
-	0x54, 0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f, 0x52, 0x45, 0x51, 0x10, 0x03, 0x12, 0x24,
-	0x0a, 0x20, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x49,
-	0x52, 0x43, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f, 0x52, 0x45,
-	0x53, 0x50, 0x10, 0x04, 0x12, 0x23, 0x0a, 0x1f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51,
-	0x55, 0x45, 0x53, 0x54, 0x5f, 0x49, 0x52, 0x43, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x53, 0x54, 0x41,
-	0x54, 0x55, 0x53, 0x5f, 0x52, 0x45, 0x51, 0x10, 0x05, 0x12, 0x24, 0x0a, 0x20, 0x54, 0x59, 0x50,
-	0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x49, 0x52, 0x43, 0x5f, 0x47, 0x45,
-	0x54, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x52, 0x45, 0x53, 0x50, 0x10, 0x06, 0x12,
+	0x45, 0x53, 0x5f, 0x52, 0x45, 0x53, 0x50, 0x10, 0x02, 0x12, 0x24, 0x0a, 0x20, 0x54, 0x59, 0x50,
+	0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x48, 0x41, 0x54, 0x5f, 0x47,
+	0x45, 0x54, 0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f, 0x52, 0x45, 0x51, 0x10, 0x03, 0x12,
 	0x25, 0x0a, 0x21, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f,
-	0x45, 0x56, 0x45, 0x4e, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47,
-	0x5f, 0x52, 0x45, 0x51, 0x10, 0x07, 0x12, 0x26, 0x0a, 0x22, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52,
+	0x43, 0x48, 0x41, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f,
+	0x52, 0x45, 0x53, 0x50, 0x10, 0x04, 0x12, 0x25, 0x0a, 0x21, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52,
 	0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x5f, 0x47, 0x45, 0x54,
-	0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f, 0x52, 0x45, 0x53, 0x50, 0x10, 0x08, 0x12, 0x25,
-	0x0a, 0x21, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x45,
-	0x56, 0x45, 0x4e, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f,
-	0x52, 0x45, 0x51, 0x10, 0x09, 0x12, 0x26, 0x0a, 0x22, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45,
+	0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f, 0x52, 0x45, 0x51, 0x10, 0x05, 0x12, 0x26, 0x0a,
+	0x22, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x45, 0x56,
+	0x45, 0x4e, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x43, 0x4f, 0x4e, 0x46, 0x49, 0x47, 0x5f, 0x52,
+	0x45, 0x53, 0x50, 0x10, 0x06, 0x12, 0x25, 0x0a, 0x21, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45,
 	0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x45, 0x56, 0x45, 0x4e, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f,
-	0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x52, 0x45, 0x53, 0x50, 0x10, 0x0a, 0x12, 0x1d, 0x0a,
-	0x19, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x47, 0x45,
-	0x54, 0x5f, 0x55, 0x53, 0x45, 0x52, 0x5f, 0x52, 0x45, 0x51, 0x10, 0x0b, 0x12, 0x1e, 0x0a, 0x1a,
-	0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x47, 0x45, 0x54,
-	0x5f, 0x55, 0x53, 0x45, 0x52, 0x5f, 0x52, 0x45, 0x53, 0x50, 0x10, 0x0c, 0x42, 0x21, 0x5a, 0x1f,
-	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x6e,
-	0x6f, 0x6d, 0x6f, 0x75, 0x73, 0x6b, 0x6f, 0x69, 0x2f, 0x74, 0x77, 0x69, 0x74, 0x63, 0x68, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x52, 0x45, 0x51, 0x10, 0x07, 0x12, 0x26, 0x0a, 0x22,
+	0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55, 0x45, 0x53, 0x54, 0x5f, 0x45, 0x56, 0x45,
+	0x4e, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x52, 0x45,
+	0x53, 0x50, 0x10, 0x08, 0x12, 0x1d, 0x0a, 0x19, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51,
+	0x55, 0x45, 0x53, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x55, 0x53, 0x45, 0x52, 0x5f, 0x52, 0x45,
+	0x51, 0x10, 0x09, 0x12, 0x1e, 0x0a, 0x1a, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x52, 0x45, 0x51, 0x55,
+	0x45, 0x53, 0x54, 0x5f, 0x47, 0x45, 0x54, 0x5f, 0x55, 0x53, 0x45, 0x52, 0x5f, 0x52, 0x45, 0x53,
+	0x50, 0x10, 0x0a, 0x42, 0x21, 0x5a, 0x1f, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x6e, 0x6f, 0x6d, 0x6f, 0x75, 0x73, 0x6b, 0x6f, 0x69, 0x2f,
+	0x74, 0x77, 0x69, 0x74, 0x63, 0x68, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -856,40 +745,36 @@ func file_request_proto_rawDescGZIP() []byte {
 }
 
 var file_request_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_request_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_request_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_request_proto_goTypes = []any{
 	(MessageTypeRequest)(0),           // 0: twitch.MessageTypeRequest
 	(*ListProfilesRequest)(nil),       // 1: twitch.ListProfilesRequest
 	(*ListProfilesResponse)(nil),      // 2: twitch.ListProfilesResponse
-	(*IRCGetConfigRequest)(nil),       // 3: twitch.IRCGetConfigRequest
-	(*IRCGetConfigResponse)(nil),      // 4: twitch.IRCGetConfigResponse
-	(*IRCGetStatusRequest)(nil),       // 5: twitch.IRCGetStatusRequest
-	(*IRCGetStatusResponse)(nil),      // 6: twitch.IRCGetStatusResponse
-	(*EventSubGetConfigRequest)(nil),  // 7: twitch.EventSubGetConfigRequest
-	(*EventSubGetConfigResponse)(nil), // 8: twitch.EventSubGetConfigResponse
-	(*EventSubGetStatusRequest)(nil),  // 9: twitch.EventSubGetStatusRequest
-	(*EventSubGetStatusResponse)(nil), // 10: twitch.EventSubGetStatusResponse
-	(*GetAvatarPathRequest)(nil),      // 11: twitch.GetAvatarPathRequest
-	(*GetAvatarPathResponse)(nil),     // 12: twitch.GetAvatarPathResponse
-	(*GetUserRequest)(nil),            // 13: twitch.GetUserRequest
-	(*GetUserResponse)(nil),           // 14: twitch.GetUserResponse
-	(*IRCConfig)(nil),                 // 15: twitch.IRCConfig
-	(ChatStatus)(0),                   // 16: twitch.ChatStatus
-	(*EventSubConfig)(nil),            // 17: twitch.EventSubConfig
-	(EventSubStatus)(0),               // 18: twitch.EventSubStatus
-	(*User)(nil),                      // 19: twitch.User
+	(*ChatGetConfigRequest)(nil),      // 3: twitch.ChatGetConfigRequest
+	(*ChatGetConfigResponse)(nil),     // 4: twitch.ChatGetConfigResponse
+	(*EventSubGetConfigRequest)(nil),  // 5: twitch.EventSubGetConfigRequest
+	(*EventSubGetConfigResponse)(nil), // 6: twitch.EventSubGetConfigResponse
+	(*EventSubGetStatusRequest)(nil),  // 7: twitch.EventSubGetStatusRequest
+	(*EventSubGetStatusResponse)(nil), // 8: twitch.EventSubGetStatusResponse
+	(*GetAvatarPathRequest)(nil),      // 9: twitch.GetAvatarPathRequest
+	(*GetAvatarPathResponse)(nil),     // 10: twitch.GetAvatarPathResponse
+	(*GetUserRequest)(nil),            // 11: twitch.GetUserRequest
+	(*GetUserResponse)(nil),           // 12: twitch.GetUserResponse
+	(*ChatConfig)(nil),                // 13: twitch.ChatConfig
+	(*EventSubConfig)(nil),            // 14: twitch.EventSubConfig
+	(EventSubStatus)(0),               // 15: twitch.EventSubStatus
+	(*User)(nil),                      // 16: twitch.User
 }
 var file_request_proto_depIdxs = []int32{
-	15, // 0: twitch.IRCGetConfigResponse.config:type_name -> twitch.IRCConfig
-	16, // 1: twitch.IRCGetStatusResponse.status:type_name -> twitch.ChatStatus
-	17, // 2: twitch.EventSubGetConfigResponse.config:type_name -> twitch.EventSubConfig
-	18, // 3: twitch.EventSubGetStatusResponse.status:type_name -> twitch.EventSubStatus
-	19, // 4: twitch.GetUserResponse.user:type_name -> twitch.User
-	5,  // [5:5] is the sub-list for method output_type
-	5,  // [5:5] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	13, // 0: twitch.ChatGetConfigResponse.config:type_name -> twitch.ChatConfig
+	14, // 1: twitch.EventSubGetConfigResponse.config:type_name -> twitch.EventSubConfig
+	15, // 2: twitch.EventSubGetStatusResponse.status:type_name -> twitch.EventSubStatus
+	16, // 3: twitch.GetUserResponse.user:type_name -> twitch.User
+	4,  // [4:4] is the sub-list for method output_type
+	4,  // [4:4] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_request_proto_init() }
@@ -926,7 +811,7 @@ func file_request_proto_init() {
 			}
 		}
 		file_request_proto_msgTypes[2].Exporter = func(v any, i int) any {
-			switch v := v.(*IRCGetConfigRequest); i {
+			switch v := v.(*ChatGetConfigRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -938,7 +823,7 @@ func file_request_proto_init() {
 			}
 		}
 		file_request_proto_msgTypes[3].Exporter = func(v any, i int) any {
-			switch v := v.(*IRCGetConfigResponse); i {
+			switch v := v.(*ChatGetConfigResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -950,30 +835,6 @@ func file_request_proto_init() {
 			}
 		}
 		file_request_proto_msgTypes[4].Exporter = func(v any, i int) any {
-			switch v := v.(*IRCGetStatusRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_request_proto_msgTypes[5].Exporter = func(v any, i int) any {
-			switch v := v.(*IRCGetStatusResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_request_proto_msgTypes[6].Exporter = func(v any, i int) any {
 			switch v := v.(*EventSubGetConfigRequest); i {
 			case 0:
 				return &v.state
@@ -985,7 +846,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[7].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[5].Exporter = func(v any, i int) any {
 			switch v := v.(*EventSubGetConfigResponse); i {
 			case 0:
 				return &v.state
@@ -997,7 +858,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[8].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[6].Exporter = func(v any, i int) any {
 			switch v := v.(*EventSubGetStatusRequest); i {
 			case 0:
 				return &v.state
@@ -1009,7 +870,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[9].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[7].Exporter = func(v any, i int) any {
 			switch v := v.(*EventSubGetStatusResponse); i {
 			case 0:
 				return &v.state
@@ -1021,7 +882,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[10].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[8].Exporter = func(v any, i int) any {
 			switch v := v.(*GetAvatarPathRequest); i {
 			case 0:
 				return &v.state
@@ -1033,7 +894,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[11].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[9].Exporter = func(v any, i int) any {
 			switch v := v.(*GetAvatarPathResponse); i {
 			case 0:
 				return &v.state
@@ -1045,7 +906,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[12].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[10].Exporter = func(v any, i int) any {
 			switch v := v.(*GetUserRequest); i {
 			case 0:
 				return &v.state
@@ -1057,7 +918,7 @@ func file_request_proto_init() {
 				return nil
 			}
 		}
-		file_request_proto_msgTypes[13].Exporter = func(v any, i int) any {
+		file_request_proto_msgTypes[11].Exporter = func(v any, i int) any {
 			switch v := v.(*GetUserResponse); i {
 			case 0:
 				return &v.state
@@ -1076,7 +937,7 @@ func file_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_request_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   14,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -29,6 +29,8 @@ var (
 		"chat:read",
 		"moderator:manage:banned_users",
 		"moderator:read:followers",
+		"user:read:chat",
+		"user:write:chat",
 	}
 )
 
@@ -49,8 +51,8 @@ func (t *Twitch) handleCommand(ctx context.Context) error {
 			resp = t.handleCommandWriteProfile(msg)
 		case int32(MessageTypeCommand_TYPE_COMMAND_DELETE_PROFILE_REQ):
 			resp = t.handleCommandDeleteProfile(msg)
-		case int32(MessageTypeCommand_TYPE_COMMAND_IRC_SET_CONFIG_REQ):
-			resp = t.handleIRCSetConfigRequest(msg)
+		case int32(MessageTypeCommand_TYPE_COMMAND_CHAT_SET_CONFIG_REQ):
+			resp = t.handleChatSetConfigRequest(msg)
 		case int32(MessageTypeCommand_TYPE_COMMAND_EVENT_SET_CONFIG_REQ):
 			resp = t.handleEventSubSetConfigRequest(msg)
 		}
@@ -85,7 +87,7 @@ func (t *Twitch) handleCommandGetOAuthURL(reqMsg *bus.BusMessage) *bus.BusMessag
 		Type:  int32(MessageTypeCommand_TYPE_COMMAND_GET_OAUTH_URL_RES),
 	}
 	if err != nil {
-		t.log.Error("marshalling", "type", "GetOAuthURLResposne", "error", err.Error())
+		t.Log.Error("marshalling", "type", "GetOAuthURLResposne", "error", err.Error())
 		msg.Error = &bus.Error{
 			Detail: proto.String("marshalling: " + err.Error()),
 		}
@@ -101,7 +103,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 		Topic: reqMsg.GetTopic(),
 	}
 	if err := proto.Unmarshal(reqMsg.GetMessage(), wpr); err != nil {
-		t.log.Error("unmarshalling", "type", "WriteProfileRequest", "error", err.Error())
+		t.Log.Error("unmarshalling", "type", "WriteProfileRequest", "error", err.Error())
 		msg.Error = &bus.Error{
 			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
 			Detail: proto.String("unmarshalling: " + err.Error()),
@@ -114,7 +116,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	state := token.ClientId
 	nonce, _, _ := strings.Cut(state, ":")
 	if t.oauthStateToken(nonce) != state {
-		t.log.Debug("state validation failed", "state", state,
+		t.Log.Debug("state validation failed", "state", state,
 			"computed", t.oauthStateToken(nonce),
 		)
 		msg.Error = &bus.Error{
@@ -126,7 +128,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	token.ClientId = clientID
 	client, err := newClient(token)
 	if err != nil {
-		t.log.Error("creating client", "error", err.Error())
+		t.Log.Error("creating client", "error", err.Error())
 		msg.Error = &bus.Error{
 			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
 			Detail: proto.String("creating client: " + err.Error()),
@@ -137,7 +139,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	profile.Name = validationResp.Data.Login
 	profile.Token.UserId = validationResp.Data.UserID
 	if err != nil {
-		t.log.Error("validating new token", "error", err.Error())
+		t.Log.Error("validating new token", "error", err.Error())
 		msg.Error = &bus.Error{
 			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
 			Detail: proto.String("validating token: " + err.Error()),
@@ -153,7 +155,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	}
 
 	if err := t.addProfile(profile); err != nil {
-		t.log.Error("adding profile", "error", err.Error())
+		t.Log.Error("adding profile", "error", err.Error())
 		msg.Error = &bus.Error{
 			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
 			Detail: proto.String("invalid profile: " + err.Error()),
@@ -166,10 +168,10 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	}
 	t.cfg.Profiles[wpr.Profile.Name] = wpr.GetProfile()
 	t.lock.Unlock()
-	t.log.Info("twitch profile saved", "name", wpr.Profile.Name)
+	t.Log.Info("twitch profile saved", "name", wpr.Profile.Name)
 	b, err := proto.Marshal(&WriteProfileResponse{})
 	if err != nil {
-		t.log.Error("marshalling", "type", "WriteProfileResponse", "error", err.Error())
+		t.Log.Error("marshalling", "type", "WriteProfileResponse", "error", err.Error())
 		return nil
 	}
 	msg.Type = int32(MessageTypeCommand_TYPE_COMMAND_WRITE_PROFILE_RESP)
@@ -180,7 +182,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 func (t *Twitch) revokeToken(profileName string) {
 	profile, present := t.cfg.Profiles[profileName]
 	if !present {
-		t.log.Debug("profile not present to revoke", "name", profile)
+		t.Log.Debug("profile not present to revoke", "name", profile)
 		return
 	}
 	values := url.Values{}
@@ -192,21 +194,21 @@ func (t *Twitch) revokeToken(profileName string) {
 		strings.NewReader(values.Encode()),
 	)
 	if err != nil {
-		t.log.Error("creating revoke request", "error", err.Error())
+		t.Log.Error("creating revoke request", "error", err.Error())
 		return
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Cache-Control", "no-store")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		t.log.Error("sending revoke request", "error", err.Error())
+		t.Log.Error("sending revoke request", "error", err.Error())
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		t.log.Error("non-200 status revoking token", "code", resp.StatusCode, "status", resp.Status)
+		t.Log.Error("non-200 status revoking token", "code", resp.StatusCode, "status", resp.Status)
 		return
 	}
-	t.log.Info("revoked token", "name", profileName)
+	t.Log.Info("revoked token", "name", profileName)
 }
 
 func (t *Twitch) oauthStateToken(nonce string) string {
@@ -224,7 +226,7 @@ func (t *Twitch) handleCommandDeleteProfile(reqMsg *bus.BusMessage) *bus.BusMess
 		Type:  int32(MessageTypeCommand_TYPE_COMMAND_DELETE_PROFILE_RESP),
 	}
 	if err := proto.Unmarshal(reqMsg.GetMessage(), dpr); err != nil {
-		t.log.Error("unmarshalling", "type", "DeleteProfileRequest", "error", err.Error())
+		t.Log.Error("unmarshalling", "type", "DeleteProfileRequest", "error", err.Error())
 		msg.Error = &bus.Error{
 			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
 			Detail: proto.String("unmarshalling: " + err.Error()),
@@ -243,30 +245,27 @@ func (t *Twitch) handleCommandDeleteProfile(reqMsg *bus.BusMessage) *bus.BusMess
 	return msg
 }
 
-func (t *Twitch) handleIRCSetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
-	scr := &IRCSetConfigRequest{}
-	msg := &bus.BusMessage{
-		Topic: reqMsg.GetTopic(),
-		Type:  int32(MessageTypeCommand_TYPE_COMMAND_IRC_SET_CONFIG_RESP),
+func (t *Twitch) handleChatSetConfigRequest(msg *bus.BusMessage) *bus.BusMessage {
+	reply := &bus.BusMessage{
+		Topic: msg.GetTopic(),
+		Type:  msg.GetType() + 1,
 	}
-	if err := proto.Unmarshal(reqMsg.GetMessage(), scr); err != nil {
-		t.log.Error("unmarshalling", "type", "IRCSetConfigRequest", "error", err.Error())
-		msg.Error = &bus.Error{
-			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
-			Detail: proto.String("unmarshalling: " + err.Error()),
-		}
-		return msg
+	scr := &ChatSetConfigRequest{}
+	if reply.Error = t.UnmarshalMessage(msg, scr); reply.Error != nil {
+		return reply
 	}
 	t.lock.Lock()
-	t.cfg.IrcConfig = scr.Config
+	t.cfg.ChatConfig = scr.Config
 	t.lock.Unlock()
-	if scr.Config.Enabled {
-		t.startChat(scr.Config)
-	} else {
-		t.stopChat()
-	}
-	msg.Message, _ = proto.Marshal(&IRCSetConfigResponse{})
-	return msg
+	/*
+		if scr.Config.Enabled {
+			t.startChat(scr.Config)
+		} else {
+			t.stopChat()
+		}
+	*/
+	reply.Message, _ = proto.Marshal(&ChatSetConfigResponse{})
+	return reply
 }
 
 func (t *Twitch) handleEventSubSetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
@@ -276,7 +275,7 @@ func (t *Twitch) handleEventSubSetConfigRequest(reqMsg *bus.BusMessage) *bus.Bus
 		Type:  int32(MessageTypeCommand_TYPE_COMMAND_EVENT_SET_CONFIG_RESP),
 	}
 	if err := proto.Unmarshal(reqMsg.GetMessage(), scr); err != nil {
-		t.log.Error("unmarshalling", "type", "EventSubSetConfigRequest", "error", err.Error())
+		t.Log.Error("unmarshalling", "type", "EventSubSetConfigRequest", "error", err.Error())
 		msg.Error = &bus.Error{
 			Code:   int32(bus.CommonErrorCode_INVALID_TYPE),
 			Detail: proto.String("unmarshalling: " + err.Error()),
@@ -291,6 +290,6 @@ func (t *Twitch) handleEventSubSetConfigRequest(reqMsg *bus.BusMessage) *bus.Bus
 	} else {
 		t.stopEventSub()
 	}
-	msg.Message, _ = proto.Marshal(&IRCSetConfigResponse{})
+	msg.Message, _ = proto.Marshal(&ChatSetConfigResponse{})
 	return msg
 }

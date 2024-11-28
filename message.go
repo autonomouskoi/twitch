@@ -38,6 +38,9 @@ const (
 	EventTypeSubscription    = "channel.subscribe"
 	EventVersionSubscription = "1"
 
+	// scope: user:read:chat
+	EventVersionChannelChatMessage = "1"
+
 	MessageTypeNotification     = "notification"
 	MessageTypeSessionKeepalive = "session_keepalive"
 	MessageTypeSessionReconnect = "session_reconnect"

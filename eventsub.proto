@@ -10,6 +10,7 @@ enum MessageTypeEventSub {
     TYPE_CHANNEL_FOLLOW              = 3;
     TYPE_CHANNEL_CHEER               = 4;
     TYPE_CHANNEL_POINT_CUSTOM_REDEEM = 5;
+    TYPE_CHANNEL_CHAT_MESSAGE        = 6;
 }
 
 enum EventSubStatus {
@@ -70,4 +71,81 @@ message EventChannelRaid {
     EventUser  from_broadcaster = 1;
     EventUser  to_broadcaster   = 2;
     uint32     viewers          = 3;
+}
+
+// ------ Chat
+
+enum ChatMessageFragmentType {
+    text      = 0;
+    cheermote = 1;
+    emote     = 2;
+    mention   = 3;
+}
+
+message ChatMessageCheermote {
+    string  prefix = 1;
+    int64   bits   = 2;
+    int32   tier   = 3;
+}
+
+message ChatMessageEmote {
+              string  id           = 1;
+              string  emote_set_id = 2;
+              string  owner_id     = 3;
+    repeated  string  format       = 4;
+}
+
+message ChatMessageFragment {
+    ChatMessageFragmentType  type      = 1;
+    string                   text      = 2;
+    ChatMessageCheermote     cheermote = 3;
+    ChatMessageEmote         emote     = 4;
+    EventUser                mention   = 5;
+}
+
+message ChatMessage {
+              string               text      = 1;
+    repeated  ChatMessageFragment  fragments = 2;
+}
+
+enum ChatMessageType {
+    chat_message_type_text                       = 0;
+    chat_message_type_channel_points_highlighted = 1;
+    chat_message_type_channel_points_sub_only    = 2;
+    chat_message_type_user_intro                 = 3;
+}
+
+message ChatBadge {
+    string  set_id = 1;
+    string  id     = 2;
+    string  info   = 3;
+}
+
+message ChatMessageCheer {
+    int64  bits = 1;
+}
+
+message ChatMessageReply {
+    string     parent_message_id   = 1;
+    string     parent_message_body = 2;
+    EventUser  parent_user         = 3;
+    string     thread_message_id   = 4;
+    EventUser  thread_user         = 5;
+}
+
+message EventChannelChatMessage {
+              string            id                              = 1;
+              EventUser         broadcaster                     = 2;
+              EventUser         chatter                         = 3;
+              ChatMessage       message                         = 4;
+              ChatMessageType   message_type                    = 5;
+    repeated  ChatBadge         badges                          = 6;
+              ChatMessageCheer  cheer                           = 7;
+              string            color                           = 8;
+              ChatMessageReply  reply                           = 9;
+              string            channel_points_custom_reward_id = 10;
+    message Enrichments {
+        bool  is_mod = 1;
+    }
+              Enrichments       enrichments                     = 11;
 }

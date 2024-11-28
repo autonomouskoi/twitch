@@ -2,86 +2,30 @@ import { bus, enumName } from "/bus.js";
 import * as buspb from "/pb/bus/bus_pb.js";
 import * as chatpb from "/m/twitch/pb/chat_pb.js";
 import * as commandpb from "/m/twitch/pb/command_pb.js";
+import * as eventsubpb from "/m/twitch/pb/eventsub_pb.js";
 import * as requestpb from "/m/twitch/pb/request_pb.js";
 import * as twitchpb from "/m/twitch/pb/twitch_pb.js";
 
 const TOPIC_TWITCH_COMMAND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_COMMAND);
 const TOPIC_TWITCH_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_REQUEST);
-const TOPIC_TWITCH_CHAT_EVENT = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_EVENT);
 const TOPIC_TWITCH_CHAT_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_CHAT_REQUEST);
+const TOPIC_TWITCH_EVENTSUB_EVENT = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_EVENTSUB_EVENT);
 
-interface Status {
-    status: chatpb.ChatStatus;
-    detail: string;
+interface ChatMessage {
+    chatter: string;
+    message: string;
 }
 
-class IRCStatus extends HTMLElement {
-    private _span: HTMLSpanElement;
-
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this.shadowRoot.innerHTML = '<span title="Unknown">?</span>';
-        this._span = this.shadowRoot.querySelector("span") as HTMLSpanElement;
-    }
-
-    connectedCallback() {
-        // this causes us to receive chat messages twice. To need modify the bus
-        // to be an array of subscriptions
-        //bus.subscribe(TOPIC_TWITCH_CHAT_EVENT, (msg) => this.handleChatEvent(msg));
-        let msg = new buspb.BusMessage();
-        msg.topic = TOPIC_TWITCH_REQUEST;
-        msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_IRC_GET_STATUS_REQ;
-        msg.message = new requestpb.IRCGetStatusRequest().toBinary();
-        bus.waitForTopic(msg.topic, 5000)
-            .then(() => bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
-                if (reply.type !== requestpb.MessageTypeRequest.TYPE_REQUEST_IRC_GET_STATUS_RESP) {
-                    return;
-                }
-                this.status = requestpb.IRCGetStatusResponse.fromBinary(reply.message);
-            }));
-    }
-    disconnectedCallback() {
-        bus.unsubscribe(TOPIC_TWITCH_CHAT_EVENT);
-    }
-
-    handleChatEvent(msg: buspb.BusMessage) {
-        let ev = chatpb.ChatEvent.fromBinary(msg.message);
-        switch (ev.type) {
-            case chatpb.ChatEventType.EVENT_TYPE_STATUS:
-                this.status = ev;
-                break;
-        }
-    }
-    set status(status: Status) {
-        switch (status.status) {
-            case chatpb.ChatStatus.UNKNOWN:
-                this._span.innerText = '?';
-                break
-            case chatpb.ChatStatus.CONNECTED:
-                this._span.innerHTML = '&#x2705;';
-                break
-            case chatpb.ChatStatus.ERROR:
-                this._span.innerHTML = '&#x274C';
-                break
-            case chatpb.ChatStatus.OFF:
-                this._span.innerHTML = '&#x25CE';
-        }
-        this._span.title = status.detail;
-    }
-}
-customElements.define('twitch-irc-status', IRCStatus);
-
-function chatMessageDiv(cmi: chatpb.TwitchChatEventMessageIn): HTMLDivElement {
+function chatMessageDiv(cm: ChatMessage): HTMLDivElement {
     let div = document.createElement('div') as HTMLDivElement;
     div.innerHTML= `
-${new Date().toLocaleString()} | ${cmi.nick}> `;
-    div.appendChild(document.createTextNode(cmi.text));
+${new Date().toLocaleString()} | ${cm.chatter}> `;
+    div.appendChild(document.createTextNode(cm.message));
     return div;
 }
 
 const MESSAGE_COUNT = 100;
-class IRCChat extends HTMLElement {
+class LiveChat extends HTMLElement {
     private _container: HTMLElement;
     private _sendButton: HTMLButtonElement;
     private _messageInput: HTMLInputElement;
@@ -126,21 +70,25 @@ section {
         });
         this._sendButton = this.shadowRoot.querySelector('#button-send-message');
         this._sendButton.onclick = () => this._send();
-    }
-
-    connectedCallback() {
-        bus.subscribe(TOPIC_TWITCH_CHAT_EVENT, (msg: buspb.BusMessage) => this.handleChatRecv(msg));
+        bus.subscribe(TOPIC_TWITCH_EVENTSUB_EVENT, (msg: buspb.BusMessage) => this.handleChatRecv(msg));
     }
 
     handleChatRecv(msg: buspb.BusMessage) {
         switch (msg.type) {
-            case chatpb.MessageTypeTwitchChatEvent.TWITCH_CHAT_EVENT_TYPE_MESSAGE_IN:
-                this.appendCMI(chatpb.TwitchChatEventMessageIn.fromBinary(msg.message));
+            case eventsubpb.MessageTypeEventSub.TYPE_CHANNEL_CHAT_MESSAGE:
+                let ccm = eventsubpb.EventChannelChatMessage.fromBinary(msg.message);
+                let cm = {
+                    chatter: ccm.chatter.login,
+                    message: ccm.message.text,
+                };
+                this.appendCMI(cm);
                 break;
+            default:
+                throw(`Unhandled message type ${msg.getType()}`);
         }
     }
-    appendCMI(cmi: chatpb.TwitchChatEventMessageIn) {
-        this._container.appendChild(chatMessageDiv(cmi));
+    appendCMI(cm: ChatMessage) {
+        this._container.appendChild(chatMessageDiv(cm));
         while (this._container.children.length > MESSAGE_COUNT) {
             this._container.removeChild(this._container.children[0]);
         }
@@ -148,6 +96,7 @@ section {
     }
 
     private _send() {
+        this._sendButton.disabled = true;
         let text = this._messageInput.value;
         if (!text) {
             return;
@@ -156,23 +105,21 @@ section {
         cmo.text = text;
         let msg = new buspb.BusMessage();
         msg.topic = TOPIC_TWITCH_CHAT_REQUEST;
+        msg.type = chatpb.MessageTypeTwitchChatRequest.TWITCH_CHAT_REQUEST_TYPE_SEND_REQ;
         msg.message = cmo.toBinary();
-        bus.send(msg);
-        this._messageInput.value = '';
-        let cmi = new chatpb.TwitchChatEventMessageIn();
-        cmi.nick = '(You)';
-        cmi.text = text;
-        this.appendCMI(cmi);
+        bus.sendAnd(msg).then((reply) => {
+            this._messageInput.value = '';
+        }).catch((e) => console.log(`error sending chat message: ${JSON.stringify(e)}`))
+        .finally(() => { this._sendButton.disabled = false; });
     }
 }
-customElements.define('twitch-irc-chat', IRCChat);
+customElements.define('twitch-chat', LiveChat);
 
-class IRCConfig extends HTMLElement {
-    private _enabledCheckbox: HTMLInputElement;
+class ChatConfig extends HTMLElement {
     private _profileSelect: HTMLSelectElement;
     private _prefixInput: HTMLInputElement;
     private _saveButton: HTMLButtonElement;
-    private _cfg: chatpb.IRCConfig;
+    private _cfg: chatpb.ChatConfig;
 
     constructor() {
         super();
@@ -184,21 +131,13 @@ fieldset {
     flex-direction: row;
     gap: 5px;
 }
-twitch-irc-chat {
+twitch-chat {
     flex-grow: 100;
 }
 </style>
 <fieldset>
 <legend>Chat</legend>
 <div>
-    <section>
-            <label for="twitch-irc-status">Status: </label>
-            <twitch-irc-status id="twitch-irc-status"></twitch-irc-status>
-    </section>
-    <section>
-            <label for="checkbox-enabled">Enabled</label>
-            <input id="checkbox-enabled" type="checkbox" />
-    </section>
     <section>
             <label for="select-profile">Using Account</label>
             <select id="select-profile"></select>
@@ -209,27 +148,19 @@ twitch-irc-chat {
     </section>
     <button id="button-save" disabled>Save</button>
 </div>
-<twitch-irc-chat></twitch-irc-chat>
+<twitch-chat></twitch-chat>
 </fieldset>
 `;
-        this._enabledCheckbox = this.shadowRoot.querySelector("#checkbox-enabled");
         this._profileSelect = this.shadowRoot.querySelector('#select-profile');
         this._prefixInput = this.shadowRoot.querySelector('#input-prefix');
         this._saveButton = this.shadowRoot.querySelector('#button-save');
         this._saveButton.onclick = () => this._save();
-        this._cfg = new chatpb.IRCConfig();
+        this._cfg = new chatpb.ChatConfig();
     }
 
     connectedCallback() {
         bus.waitForTopic(TOPIC_TWITCH_REQUEST, 5000)
             .then(() => this._getProfiles());
-    }
-
-    get enabled(): boolean {
-        return this._enabledCheckbox.checked;
-    }
-    set enabled(value: boolean) {
-        this._enabledCheckbox.checked = value;
     }
 
     get selectedProfile(): string {
@@ -271,19 +202,18 @@ twitch-irc-chat {
     private _getConfig() {
         let msg = new buspb.BusMessage();
         msg.topic = TOPIC_TWITCH_REQUEST;
-        msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_IRC_GET_CONFIG_REQ;
-        msg.message = new requestpb.IRCGetConfigRequest().toBinary();
+        msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_CHAT_GET_CONFIG_REQ;
+        msg.message = new requestpb.ChatGetConfigRequest().toBinary();
         bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
             if (reply.error) {
                 throw reply.error.detail;
             }
             this._saveButton.disabled = false;
-            let gicr = requestpb.IRCGetConfigResponse.fromBinary(reply.message);
+            let gicr = requestpb.ChatGetConfigResponse.fromBinary(reply.message);
             if (!gicr.config) {
                 return;
             }
             this._cfg = gicr.config;
-            this.enabled = gicr.config.enabled;
             if (gicr.config.profile) {
                 this.selectedProfile = gicr.config.profile;
             }
@@ -294,14 +224,14 @@ twitch-irc-chat {
     private _save() {
         this._saveButton.disabled = true;
         this._saveButton.innerText = 'Saving...';
-        this._cfg.enabled = this.enabled;
+        this._cfg.enabled = true;
         this._cfg.profile = this.selectedProfile;
         this._cfg.messagePrefix = this._prefixInput.value;
-        let iscr = new commandpb.IRCSetConfigRequest();
+        let iscr = new commandpb.ChatSetConfigRequest();
         iscr.config = this._cfg;
         let msg = new buspb.BusMessage();
         msg.topic = TOPIC_TWITCH_COMMAND;
-        msg.type = commandpb.MessageTypeCommand.TYPE_COMMAND_IRC_SET_CONFIG_REQ;
+        msg.type = commandpb.MessageTypeCommand.TYPE_COMMAND_CHAT_SET_CONFIG_REQ;
         msg.message = iscr.toBinary();
         bus.waitForTopic(TOPIC_TWITCH_COMMAND, 5000)
             .then(() => bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
@@ -319,6 +249,6 @@ twitch-irc-chat {
             }, 3000));
     }
 }
-customElements.define('twitch-irc-config', IRCConfig);
+customElements.define('twitch-chat-config', ChatConfig);
 
-export { IRCConfig };
+export { ChatConfig };

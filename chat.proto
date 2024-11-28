@@ -3,7 +3,7 @@ package twitch;
 
 option go_package = "github.com/autonomouskoi/twitch";
 
-message IRCConfig {
+message ChatConfig {
     bool    enabled        = 1;
     string  profile        = 2;
     string  message_prefix = 3;
@@ -18,45 +18,7 @@ enum MessageTypeTwitchChatRequest {
     TWITCH_CHAT_REQUEST_TYPE_SEND_RESP = 1;
 }
 
-enum ChatStatus {
-    CHAT_STATUS_UNKNOWN   = 0;
-    CHAT_STATUS_OFF       = 1;
-    CHAT_STATUS_CONNECTED = 2;
-    CHAT_STATUS_ERROR     = 3;
-}
-
 message TwitchChatRequestSendRequest {
     string  text = 1;
 }
 message TwitchChatRequestSendResponse {}
-
-message EmotePosition {
-    uint32  start = 1;
-    uint32  end   = 2;
-}
-
-message Emote {
-              string         id        = 1;
-    repeated  EmotePosition  positions = 2;
-}
-
-message TwitchChatEventMessageIn {
-              string               text   = 1;
-    repeated  string               args   = 2;
-              string               nick   = 3;
-    repeated  Emote                emotes = 4;
-              map<string, string>  tags   = 5;
-    optional  bool                 is_mod = 6;
-}
-
-enum ChatEventType {
-    EVENT_TYPE_UNSPECIFIED = 0;
-    EVENT_TYPE_STATUS      = 1;
-    EVENT_TYPE_JOIN        = 2;
-}
-
-message ChatEvent {
-    ChatEventType  type   = 1;
-    string         detail = 2;
-    ChatStatus     status = 3;
-}
