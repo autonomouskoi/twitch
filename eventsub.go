@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/nicklaw5/helix/v2"
 	"golang.org/x/sync/errgroup"
@@ -63,6 +65,15 @@ func (t *Twitch) startEventSub() {
 		ctx, cancel := context.WithCancel(t.eventSub.parentCtx)
 		t.eventSub.cancel = cancel
 
+		if t.cfg.GetEsConfig().LogEvents {
+			eventLogDir := filepath.Join(t.storagePath, "logs")
+			if err := os.MkdirAll(eventLogDir, 0700); err != nil {
+				t.Log.Error("creating logs dir", "path", eventLogDir, "error", err.Error())
+			} else {
+				t.eventSub.eventLogPath = filepath.Join(eventLogDir, time.Now().Format("eventsub-20060102.json"))
+			}
+		}
+
 		t.eventSub.setStatus(EventSubStatus_EVENT_SUB_STATUS_UNKNOWN, "Connecting")
 		if err := t.eventSub.start(ctx); err != nil {
 			t.eventSub.setStatus(EventSubStatus_EVENT_SUB_STATUS_ERROR, err.Error())
@@ -89,6 +100,7 @@ type eventSub struct {
 	eg           errgroup.Group
 	status       EventSubStatus
 	statusDetail string
+	eventLogPath string
 }
 
 func (es *eventSub) connect(ctx context.Context, websocketURL string) error {
@@ -213,6 +225,21 @@ func (es *eventSub) close() {
 }
 
 func (es *eventSub) handleLoop(ctx context.Context) {
+	var je *json.Encoder
+	if es.eventLogPath != "" {
+		logfh, err := os.OpenFile(es.eventLogPath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)
+		if err != nil {
+			es.Log.Error("creating log file", "path", es.eventLogPath, "error", err.Error())
+		} else {
+			defer func() {
+				if err := logfh.Close(); err != nil {
+					es.Log.Error("closing log file", "path", es.eventLogPath, "error", err.Error())
+				}
+			}()
+			je = json.NewEncoder(logfh)
+			es.Log.Debug("logging eventsub events", "path", es.eventLogPath)
+		}
+	}
 	for {
 		if ctx.Err() != nil {
 			break
@@ -228,6 +255,11 @@ func (es *eventSub) handleLoop(ctx context.Context) {
 		if es.seen.seenID(msg.Metadata.ID) {
 			es.Log.Debug("duplicate event ID", "id", msg.Metadata.ID)
 			continue
+		}
+		if je != nil && msg.Metadata.Type != MessageTypeSessionKeepalive {
+			if err := je.Encode(msg); err != nil {
+				es.Log.Error("encoding event", "error", err.Error())
+			}
 		}
 		switch msg.Metadata.Type {
 		case MessageTypeNotification:
@@ -282,7 +314,7 @@ func (es *eventSub) handleChannelChatMessage(eventJSON json.RawMessage) *bus.Bus
 		Topic: BusTopics_TWITCH_EVENTSUB_EVENT.String(),
 		Type:  int32(MessageTypeEventSub_TYPE_CHANNEL_CHAT_MESSAGE),
 	}
-	event := &helix.EventSubChannelChatMessageEvent{}
+	event := &EventSubChannelChatMessageEvent{}
 	if err := json.Unmarshal(eventJSON, event); err != nil {
 		es.Log.Error("unmarshalling chat message event", "error", err.Error())
 		return nil
@@ -302,7 +334,7 @@ func (es *eventSub) handleChannelChatMessage(eventJSON json.RawMessage) *bus.Bus
 		Message: &ChatMessage{
 			Text: event.Message.Text,
 			Fragments: slices.Map(event.Message.Fragments,
-				func(in helix.EventSubChatMessageFragment) *ChatMessageFragment {
+				func(in EventSubChatMessageFragment) *ChatMessageFragment {
 					cmf := &ChatMessageFragment{
 						Text: in.Text,
 					}
@@ -537,4 +569,49 @@ func (es *eventSub) setStatus(status EventSubStatus, detail string) {
 		Type:    int32(MessageTypeEventSub_TYPE_EVENTSUB_EVENT),
 		Message: b,
 	})
+}
+
+// EventSubChannelChatMessageEvent fix unmarshalling chat messages until
+// https://github.com/nicklaw5/helix/issues/232
+type EventSubChannelChatMessageEvent struct {
+	BroadcasterUserID           string                         `json:"broadcaster_user_id"`
+	BroadcasterUserLogin        string                         `json:"broadcaster_user_login"`
+	BroadcasterUserName         string                         `json:"broadcaster_user_name"`
+	ChatterUserID               string                         `json:"chatter_user_id"`
+	ChatterUserLogin            string                         `json:"chatter_user_login"`
+	ChatterUserName             string                         `json:"chatter_user_name"`
+	MessageID                   string                         `json:"message_id"`
+	Message                     EventSubChatMessage            `json:"message"`
+	MessageType                 helix.EventSubChatMessageType  `json:"message_type"`
+	Badges                      []helix.EventSubChatBadge      `json:"badges"`
+	Cheer                       helix.EventSubChatMessageCheer `json:"cheer"`
+	Color                       string                         `json:"color"`
+	Reply                       helix.EventSubChatMessageReply `json:"reply"`
+	ChannelPointsCustomRewardID string                         `json:"channel_points_custom_reward_id"`
+}
+
+// EventSubChatMessage fix unmarshalling chat messages until
+// https://github.com/nicklaw5/helix/issues/232
+type EventSubChatMessage struct {
+	Text      string                        `json:"text"`
+	Fragments []EventSubChatMessageFragment `json:"fragments"`
+}
+
+// EventSubChatMessageFragment fix unmarshalling chat messages until
+// https://github.com/nicklaw5/helix/issues/232
+type EventSubChatMessageFragment struct {
+	Type      helix.EventSubChatMessageFragmentType `json:"type"`
+	Text      string                                `json:"text"`
+	Cheermote helix.EventSubChatMessageCheermote    `json:"cheermote"`
+	Emote     EventSubChatMessageEmote              `json:"emote"`
+	Mention   helix.EventSubChatMessageMention      `json:"mention"`
+}
+
+// EventSubChatMessageEmote fix unmarshalling chat messages until
+// https://github.com/nicklaw5/helix/issues/232
+type EventSubChatMessageEmote struct {
+	ID         string   `json:"id"`
+	EmoteSetID string   `json:"emote_set_id"`
+	OwnerID    string   `json:"owner_id"`
+	Format     []string `json:"format"`
 }

@@ -4,8 +4,8 @@ import * as profiles from "./profiles.js";
 
 function start(mainContainer: HTMLElement) {
     mainContainer.appendChild(new profiles.Profiles());
-    mainContainer.appendChild(new chat.ChatConfig());
     mainContainer.appendChild(new eventsub.EventSubConfig());
+    mainContainer.appendChild(new chat.ChatConfig());
 }
 
 export { start };

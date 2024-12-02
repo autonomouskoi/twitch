@@ -67,11 +67,12 @@ func init() {
 type Twitch struct {
 	http.Handler
 	modutil.ModuleBase
-	bus     *bus.Bus
-	lock    sync.Mutex
-	kv      *kv.KVPrefix
-	cfg     *Config
-	clients map[string]*client
+	bus         *bus.Bus
+	lock        sync.Mutex
+	kv          *kv.KVPrefix
+	cfg         *Config
+	clients     map[string]*client
+	storagePath string
 
 	cacheUsers ttlcache.Cache[string, *User]
 
@@ -85,6 +86,7 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 	t.Log = deps.Log
 	t.bus = deps.Bus
 	t.kv = &deps.KV
+	t.storagePath = deps.StoragePath
 	t.clients = map[string]*client{}
 	t.eventSub = &eventSub{
 		bus:       deps.Bus,
