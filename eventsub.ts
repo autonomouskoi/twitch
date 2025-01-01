@@ -71,6 +71,7 @@ customElements.define('twitc-es-status', EventSubStatus);
 
 class EventSubConfig extends HTMLElement {
     private _enabledCheckbox: HTMLInputElement;
+    private _logCheckbox: HTMLInputElement;
     private _profileSelect: HTMLSelectElement;
     private _saveButton: HTMLButtonElement;
     private _cfg: eventsubpb.EventSubConfig;
@@ -80,7 +81,7 @@ class EventSubConfig extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.innerHTML = `
 <fieldset>
-<legend>Channel Events (Subs, Follows, etc)</legend>
+<legend>Channel Events (Incoming Chat, Subs, Follows, etc)</legend>
 
 <section>
         <label for="twitc-es-status">Status: </label>
@@ -94,11 +95,18 @@ class EventSubConfig extends HTMLElement {
         <label for="select-profile">Using Account</label>
         <select id="select-profile"></select>
 </section>
+<section>
+        <label for="checkbox-log"
+            title="Logging raw events is useful for debugging"
+        >Log Raw Events (Requires module restart)</label>
+        <input id="checkbox-log" type="checkbox" />
+</section>
 <button id="button-save" disabled>Save</button>
 
 </fieldset>
 `;
         this._enabledCheckbox = this.shadowRoot.querySelector("#checkbox-enabled");
+        this._logCheckbox = this.shadowRoot.querySelector("#checkbox-log");
         this._profileSelect = this.shadowRoot.querySelector('#select-profile');
         this._saveButton = this.shadowRoot.querySelector('#button-save');
         this._saveButton.onclick = () => this._save();
@@ -169,6 +177,7 @@ class EventSubConfig extends HTMLElement {
             }
             this._cfg = gicr.config;
             this.enabled = gicr.config.enabled;
+            this._logCheckbox.checked = gicr.config.logEvents;
             if (gicr.config.profile) {
                 this.selectedProfile = gicr.config.profile;
             }
@@ -179,6 +188,7 @@ class EventSubConfig extends HTMLElement {
         this._saveButton.disabled = true;
         this._saveButton.innerText = 'Saving...';
         this._cfg.enabled = this.enabled;
+        this._cfg.logEvents = this._logCheckbox.checked;
         this._cfg.profile = this.selectedProfile;
         let iscr = new commandpb.EventSubSetConfigRequest();
         iscr.config = this._cfg;

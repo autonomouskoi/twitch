@@ -26,8 +26,9 @@ message EventSubStatusEvent {
 }
 
 message EventSubConfig {
-    bool    enabled = 1;
-    string  profile = 2;
+    bool    enabled    = 1;
+    string  profile    = 2;
+    bool    log_events = 3;
 }
 
 message EventUser {
