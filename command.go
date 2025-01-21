@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	oauthChallenge = rand.Int63()
+	oauthChallenge = rand.Int63() // invalidate token requests not from this process
 
 	oauthScopes = []string{
 		"bits:read",
@@ -34,35 +34,24 @@ var (
 	}
 )
 
+// handle commands sent to the module
 func (t *Twitch) handleCommand(ctx context.Context) error {
-	in := make(chan *bus.BusMessage, 16)
-	t.bus.Subscribe(BusTopics_TWITCH_COMMAND.String(), in)
-	go func() {
-		<-ctx.Done()
-		t.bus.Unsubscribe(BusTopics_TWITCH_COMMAND.String(), in)
-		bus.Drain(in)
-	}()
-	for msg := range in {
-		var resp *bus.BusMessage
-		switch msg.Type {
-		case int32(MessageTypeCommand_TYPE_COMMAND_GET_OAUTH_URL_REQ):
-			resp = t.handleCommandGetOAuthURL(msg)
-		case int32(MessageTypeCommand_TYPE_COMMAND_WRITE_PROFILE_REQ):
-			resp = t.handleCommandWriteProfile(msg)
-		case int32(MessageTypeCommand_TYPE_COMMAND_DELETE_PROFILE_REQ):
-			resp = t.handleCommandDeleteProfile(msg)
-		case int32(MessageTypeCommand_TYPE_COMMAND_CHAT_SET_CONFIG_REQ):
-			resp = t.handleChatSetConfigRequest(msg)
-		case int32(MessageTypeCommand_TYPE_COMMAND_EVENT_SET_CONFIG_REQ):
-			resp = t.handleEventSubSetConfigRequest(msg)
-		}
-		if resp != nil {
-			t.bus.SendReply(msg, resp)
-		}
-	}
-	return ctx.Err()
+	t.bus.HandleTypes(ctx, BusTopics_TWITCH_COMMAND.String(), 4,
+		map[int32]bus.MessageHandler{
+			int32(MessageTypeCommand_TYPE_COMMAND_GET_OAUTH_URL_REQ):    t.handleCommandGetOAuthURL,
+			int32(MessageTypeCommand_TYPE_COMMAND_WRITE_PROFILE_REQ):    t.handleCommandWriteProfile,
+			int32(MessageTypeCommand_TYPE_COMMAND_DELETE_PROFILE_REQ):   t.handleCommandDeleteProfile,
+			int32(MessageTypeCommand_TYPE_COMMAND_CHAT_SET_CONFIG_REQ):  t.handleChatSetConfigRequest,
+			int32(MessageTypeCommand_TYPE_COMMAND_EVENT_SET_CONFIG_REQ): t.handleEventSubSetConfigRequest,
+		},
+		nil,
+	)
+	return nil
 }
 
+// handle a request for an OAuth dance URL. The response will be handled by a
+// dedicated HTTP handler. this could probably be updated to use the webhook
+// mechanism
 func (t *Twitch) handleCommandGetOAuthURL(reqMsg *bus.BusMessage) *bus.BusMessage {
 	query := url.Values{}
 	query.Set("client_id", clientID)
@@ -97,6 +86,7 @@ func (t *Twitch) handleCommandGetOAuthURL(reqMsg *bus.BusMessage) *bus.BusMessag
 	return msg
 }
 
+// handle a request to write a profile. This will be invoked by oauth handler
 func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessage {
 	wpr := &WriteProfileRequest{}
 	msg := &bus.BusMessage{
@@ -179,6 +169,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	return msg
 }
 
+// call the twitch oauth endpoint to revoke a token
 func (t *Twitch) revokeToken(profileName string) {
 	profile, present := t.cfg.Profiles[profileName]
 	if !present {
@@ -211,6 +202,7 @@ func (t *Twitch) revokeToken(profileName string) {
 	t.Log.Info("revoked token", "name", profileName)
 }
 
+// generate an oauthStateToken using a given nonce
 func (t *Twitch) oauthStateToken(nonce string) string {
 	h := sha256.New()
 	h.Write([]byte(nonce))
@@ -219,6 +211,7 @@ func (t *Twitch) oauthStateToken(nonce string) string {
 	return fmt.Sprintf("%s:%s", nonce, hex.EncodeToString(hash[0:8]))
 }
 
+// handle a command to delete a profile. Also attempts to revoke the token
 func (t *Twitch) handleCommandDeleteProfile(reqMsg *bus.BusMessage) *bus.BusMessage {
 	dpr := &DeleteProfileRequest{}
 	msg := &bus.BusMessage{
@@ -245,6 +238,7 @@ func (t *Twitch) handleCommandDeleteProfile(reqMsg *bus.BusMessage) *bus.BusMess
 	return msg
 }
 
+// handle a command to update the chat config
 func (t *Twitch) handleChatSetConfigRequest(msg *bus.BusMessage) *bus.BusMessage {
 	reply := &bus.BusMessage{
 		Topic: msg.GetTopic(),
@@ -257,17 +251,11 @@ func (t *Twitch) handleChatSetConfigRequest(msg *bus.BusMessage) *bus.BusMessage
 	t.lock.Lock()
 	t.cfg.ChatConfig = scr.Config
 	t.lock.Unlock()
-	/*
-		if scr.Config.Enabled {
-			t.startChat(scr.Config)
-		} else {
-			t.stopChat()
-		}
-	*/
 	reply.Message, _ = proto.Marshal(&ChatSetConfigResponse{})
 	return reply
 }
 
+// handle a command to set the eventsub config
 func (t *Twitch) handleEventSubSetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
 	scr := &EventSubSetConfigRequest{}
 	msg := &bus.BusMessage{

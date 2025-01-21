@@ -9,6 +9,7 @@ import (
 	"github.com/nicklaw5/helix/v2"
 )
 
+// handle chat request messages
 func (t *Twitch) handleChat(ctx context.Context) error {
 	t.bus.HandleTypes(ctx, BusTopics_TWITCH_CHAT_REQUEST.String(), 8,
 		map[int32]bus.MessageHandler{
@@ -18,6 +19,7 @@ func (t *Twitch) handleChat(ctx context.Context) error {
 	return nil
 }
 
+// handle a request to send a message to twitch chat
 func (t *Twitch) handleChatSendRequest(msg *bus.BusMessage) *bus.BusMessage {
 	reply := &bus.BusMessage{
 		Topic: msg.GetTopic(),

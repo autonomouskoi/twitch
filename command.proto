@@ -19,17 +19,9 @@ enum MessageTypeCommand {
     TYPE_COMMAND_CHAT_SET_CONFIG_RESP  = 8;
     TYPE_COMMAND_EVENT_SET_CONFIG_REQ  = 9;
     TYPE_COMMAND_EVENT_SET_CONFIG_RESP = 10;
-
-/*
-    TYPE_COMMAND_BAN_USER = 3;
-*/
 }
 
-message BanUserRequest {
-    string  login  = 1;
-    string  reason = 2;
-}
-
+// Token stores a twitch OAuth token
 message Token {
               string  client_id = 1;
               string  access    = 2;
@@ -37,6 +29,7 @@ message Token {
               string  user_id   = 4;
 }
 
+// Profile wraps a token and includes the user login
 message Profile {
     string  name    = 1;
     string  user_id = 2;
@@ -49,6 +42,7 @@ message Config {
     EventSubConfig       es_config   = 3;
 }
 
+// Request a URL to do the OAuth enrollment dance
 message GetOAuthURLRequest {}
 message GetOAuthURLResponse {
     string  url = 1;

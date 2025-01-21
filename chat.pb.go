@@ -114,9 +114,9 @@ type ChatConfig struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Enabled       bool   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Profile       string `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
-	MessagePrefix string `protobuf:"bytes,3,opt,name=message_prefix,json=messagePrefix,proto3" json:"message_prefix,omitempty"`
+	Enabled       bool   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`                                 // allow disabling chat
+	Profile       string `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`                                  // default chat client and channel
+	MessagePrefix string `protobuf:"bytes,3,opt,name=message_prefix,json=messagePrefix,proto3" json:"message_prefix,omitempty"` // a prefix to add to all chat messages. Useful to make it clear that the message is coming from a bot
 }
 
 func (x *ChatConfig) Reset() {

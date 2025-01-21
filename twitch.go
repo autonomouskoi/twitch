@@ -23,6 +23,8 @@ import (
 )
 
 const (
+	// EnvLocalContentPath specifies an env var with a path to serve web content
+	// from instead of the embedded zip file, for development
 	EnvLocalContentPath = "AK_CONTENT_TWITCH"
 
 	clientID = "zqciq1diwsv0xqizn7m2gxbke6ez2v"
@@ -64,6 +66,7 @@ func init() {
 	modules.Register(manifest, &Twitch{})
 }
 
+// Twitch provides an interface to the Twitch API
 type Twitch struct {
 	http.Handler
 	modutil.ModuleBase
@@ -82,6 +85,7 @@ type Twitch struct {
 //go:embed web.zip
 var webZip []byte
 
+// Start the module
 func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 	t.Log = deps.Log
 	t.bus = deps.Bus

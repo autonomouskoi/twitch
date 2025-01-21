@@ -4,9 +4,9 @@ package twitch;
 option go_package = "github.com/autonomouskoi/twitch";
 
 message ChatConfig {
-    bool    enabled        = 1;
-    string  profile        = 2;
-    string  message_prefix = 3;
+    bool    enabled        = 1; // allow disabling chat
+    string  profile        = 2; // default chat client and channel
+    string  message_prefix = 3; // a prefix to add to all chat messages. Useful to make it clear that the message is coming from a bot
 }
 
 enum MessageTypeTwitchChatEvent {

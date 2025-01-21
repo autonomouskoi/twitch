@@ -7,7 +7,7 @@ require (
 	github.com/autonomouskoi/datastruct v0.0.13
 	github.com/autonomouskoi/mageutil v0.0.15
 	github.com/magefile/mage v1.15.0
-	github.com/nicklaw5/helix/v2 v2.30.0
+	github.com/nicklaw5/helix/v2 v2.31.0
 	golang.org/x/sync v0.10.0
 	google.golang.org/protobuf v1.36.1
 	nhooyr.io/websocket v1.8.17
@@ -19,7 +19,7 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect

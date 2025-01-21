@@ -31,7 +31,7 @@ class EventSubStatus extends HTMLElement {
         msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_EVENT_GET_STATUS_REQ;
         msg.message = new requestpb.EventSubGetStatusRequest().toBinary();
         bus.waitForTopic(msg.topic, 5000)
-            .then(() => bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
+            .then(() => bus.sendWithReply(msg, (reply) => {
                 if (reply.type !== requestpb.MessageTypeRequest.TYPE_REQUEST_EVENT_GET_STATUS_RESP) {
                     return;
                 }
@@ -47,20 +47,20 @@ class EventSubStatus extends HTMLElement {
             case eventsubpb.MessageTypeEventSub.TYPE_EVENTSUB_EVENT:
                 let ev = eventsubpb.EventSubStatusEvent.fromBinary(msg.message);
                 this.status = ev;
-                break
+                break;
         }
     }
     set status(status: Status) {
         switch (status.status) {
             case eventsubpb.EventSubStatus.UNKNOWN:
                 this._span.innerText = '?';
-                break
+                break;
             case eventsubpb.EventSubStatus.CONNECTED:
                 this._span.innerHTML = '&#x2705;';
-                break
+                break;
             case eventsubpb.EventSubStatus.ERROR:
                 this._span.innerHTML = '&#x274C';
-                break
+                break;
             case eventsubpb.EventSubStatus.OFF:
                 this._span.innerHTML = '&#x25CE';
         }
@@ -145,14 +145,14 @@ class EventSubConfig extends HTMLElement {
         msg.topic = TOPIC_TWITCH_REQUEST;
         msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_LIST_PROFILES_REQ;
         msg.message = new requestpb.ListProfilesRequest().toBinary();
-        bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
+        bus.sendWithReply(msg, (reply) => {
             if (reply.error) {
                 throw reply.error.detail;
             }
             let lpr = requestpb.ListProfilesResponse.fromBinary(reply.message);
             this._profileSelect.textContent = '';
             lpr.names.toSorted().forEach((name) => {
-                let option = document.createElement('option') as HTMLOptionElement;
+                let option: HTMLOptionElement = document.createElement('option');
                 option.value = name;
                 option.innerText = name;
                 this._profileSelect.appendChild(option);
@@ -166,7 +166,7 @@ class EventSubConfig extends HTMLElement {
         msg.topic = TOPIC_TWITCH_REQUEST;
         msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_EVENT_GET_CONFIG_REQ;
         msg.message = new requestpb.EventSubGetConfigRequest().toBinary();
-        bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
+        bus.sendWithReply(msg, (reply) => {
             if (reply.error) {
                 throw reply.error.detail;
             }
@@ -197,7 +197,7 @@ class EventSubConfig extends HTMLElement {
         msg.type = commandpb.MessageTypeCommand.TYPE_COMMAND_EVENT_SET_CONFIG_REQ;
         msg.message = iscr.toBinary();
         bus.waitForTopic(TOPIC_TWITCH_COMMAND, 5000)
-            .then(() => bus.sendWithReply(msg, (reply: buspb.BusMessage) => {
+            .then(() => bus.sendWithReply(msg, (reply) => {
                 if (reply.error) {
                     this._saveButton.innerText = 'FAILED';
                     throw reply.error;

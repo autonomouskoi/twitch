@@ -12,32 +12,17 @@ import (
 )
 
 func (t *Twitch) handleRequest(ctx context.Context) error {
-	in := make(chan *bus.BusMessage, 16)
-	t.bus.Subscribe(BusTopics_TWITCH_REQUEST.String(), in)
-	go func() {
-		<-ctx.Done()
-		t.bus.Unsubscribe(BusTopics_TWITCH_REQUEST.String(), in)
-		bus.Drain(in)
-	}()
-	for msg := range in {
-		var reply *bus.BusMessage
-		switch msg.Type {
-		case int32(MessageTypeRequest_TYPE_REQUEST_LIST_PROFILES_REQ):
-			reply = t.handleRequestListProfiles(msg)
-		case int32(MessageTypeRequest_TYPE_REQUEST_GET_USER_REQ):
-			reply = t.handleRequestGetUser(msg)
-		case int32(MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_REQ):
-			reply = t.handleChatGetConfigRequest(msg)
-		case int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_REQ):
-			reply = t.handleEventSubGetConfigRequest(msg)
-		case int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_REQ):
-			reply = t.handleEventSubGetStatusRequest(msg)
-		}
-		if reply != nil {
-			t.bus.SendReply(msg, reply)
-		}
-	}
-	return ctx.Err()
+	t.bus.HandleTypes(ctx, BusTopics_TWITCH_REQUEST.String(), 4,
+		map[int32]bus.MessageHandler{
+			int32(MessageTypeRequest_TYPE_REQUEST_LIST_PROFILES_REQ):    t.handleRequestListProfiles,
+			int32(MessageTypeRequest_TYPE_REQUEST_GET_USER_REQ):         t.handleRequestGetUser,
+			int32(MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_REQ):  t.handleChatGetConfigRequest,
+			int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_REQ): t.handleEventSubGetConfigRequest,
+			int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_REQ): t.handleEventSubGetStatusRequest,
+		},
+		nil,
+	)
+	return nil
 }
 
 func (t *Twitch) handleRequestListProfiles(reqMsg *bus.BusMessage) *bus.BusMessage {
@@ -125,8 +110,8 @@ func (t *Twitch) handleRequestGetUser(reqMsg *bus.BusMessage) *bus.BusMessage {
 
 func (t *Twitch) handleChatGetConfigRequest(reqMsg *bus.BusMessage) *bus.BusMessage {
 	reply := &bus.BusMessage{
-		Topic: reqMsg.Topic,
-		Type:  int32(MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_RESP),
+		Topic: reqMsg.GetTopic(),
+		Type:  reqMsg.GetType() + 1,
 	}
 	cfg := &ChatConfig{}
 	if t.cfg != nil && t.cfg.ChatConfig != nil {
@@ -161,12 +146,13 @@ func (t *Twitch) handleEventSubGetStatusRequest(reqMsg *bus.BusMessage) *bus.Bus
 		Detail: t.eventSub.statusDetail,
 	})
 	return &bus.BusMessage{
-		Topic:   reqMsg.Topic,
-		Type:    int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_RESP),
+		Topic:   reqMsg.GetTopic(),
+		Type:    reqMsg.GetType() + 1,
 		Message: b,
 	}
 }
 
+// GetUser is a convenience function for GET_USER_REQ
 func GetUser(ctx context.Context, b *bus.Bus, twitchProfile, login string) (*User, error) {
 	msg := &bus.BusMessage{
 		Topic: BusTopics_TWITCH_REQUEST.String(),

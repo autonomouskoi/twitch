@@ -6,8 +6,9 @@ import * as twitchpb from "/m/twitch/pb/twitch_pb.js";
 const TOPIC_COMMAND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_COMMAND);
 
 let mainContainer = document.querySelector("#mainContainer") as HTMLElement;
-mainContainer.innerText = "Validated response...";
+mainContainer.innerText = "Validating response...";
 
+// handle a response in the oauth dance to enroll a new token
 function handleOAuth() {
     let params = new URLSearchParams(document.location.hash.slice(1));
     let access_token = params.get('access_token');

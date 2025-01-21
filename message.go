@@ -48,25 +48,31 @@ const (
 )
 
 var (
+	// ErrWrongMsgType indicates the Message doesn't carry the type you want
 	ErrWrongMsgType = errors.New("wrong message type")
 )
 
+// Message unmarshalls a messages received over the websocket
 type Message struct {
 	Metadata MessageMetadata `json:"metadata"`
 	Payload  json.RawMessage `json:"payload"`
 }
 
+// MessageMetadata has fields common to all websocket messages received
 type MessageMetadata struct {
 	ID        string    `json:"message_id"`
 	Type      string    `json:"message_type"`
 	Timestamp time.Time `json:"message_timestamp"`
 }
 
+// Notification carries the events of interest
 type Notification struct {
 	Subscription *helix.EventSubSubscription `json:"subscription"`
 	Event        json.RawMessage             `json:"event"`
 }
 
+// SessionWelcome is the initial message received from the server or indicates
+// that you should Reconnect at a different URL
 type SessionWelcome struct {
 	Session *struct {
 		ID                      string    `json:"id"`
@@ -77,10 +83,12 @@ type SessionWelcome struct {
 	} `json:"session"`
 }
 
+// Type returns the type of the message
 func (msg *Message) Type() string {
 	return msg.Metadata.Type
 }
 
+// AsSessionWelcome returns its payload as a SessionWelcome
 func (msg *Message) AsSessionWelcome() (*SessionWelcome, error) {
 	return msgAsType[SessionWelcome](msg, MessageTypeSessionWelcome)
 }
