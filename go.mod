@@ -3,13 +3,13 @@ module github.com/autonomouskoi/twitch
 go 1.22.1
 
 require (
-	github.com/autonomouskoi/akcore v0.0.14
+	github.com/autonomouskoi/akcore v0.0.15
 	github.com/autonomouskoi/datastruct v0.0.13
 	github.com/autonomouskoi/mageutil v0.0.15
 	github.com/magefile/mage v1.15.0
 	github.com/nicklaw5/helix/v2 v2.31.0
 	golang.org/x/sync v0.10.0
-	google.golang.org/protobuf v1.36.1
+	google.golang.org/protobuf v1.36.3
 	nhooyr.io/websocket v1.8.17
 )
 

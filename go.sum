@@ -6,6 +6,8 @@ github.com/autonomouskoi/akcore v0.0.13 h1:a0up+OyTYku+4/RHbCpuI/qoygbmHigxKZVVT
 github.com/autonomouskoi/akcore v0.0.13/go.mod h1:WLCN2WcmXAraeQJC2wbI6OJjcqn5F67ufcrZczKL/VM=
 github.com/autonomouskoi/akcore v0.0.14 h1:hagQtrxykZQ0Nnbusf2UO+COz9CJFuCOPfX4AMY/LGQ=
 github.com/autonomouskoi/akcore v0.0.14/go.mod h1:93GhtiB/RHVX6WdHv3AP/VT/T/amxCkxqOqMf3Z8MWg=
+github.com/autonomouskoi/akcore v0.0.15 h1:cGx5stUy6M4t8Cvt5bEGm4xIF6X/MgIPORgLZ/hM6N4=
+github.com/autonomouskoi/akcore v0.0.15/go.mod h1:93GhtiB/RHVX6WdHv3AP/VT/T/amxCkxqOqMf3Z8MWg=
 github.com/autonomouskoi/datastruct v0.0.0-20241128030344-91fb33460053 h1:+QY4Da5HmF0ABRvwviMDk9OtHbcA/6DdmZQjEF5+5Ss=
 github.com/autonomouskoi/datastruct v0.0.0-20241128030344-91fb33460053/go.mod h1:vavjFRRPddUMUKJW2n71OFfKCMqriBQZYaScP7ZZz48=
 github.com/autonomouskoi/datastruct v0.0.13 h1:EuEbJLhBPSOgUNegRQKZ370TRtifVcXYijrQaVMN0fs=
@@ -191,6 +193,8 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.36.1 h1:yBPeRvTftaleIgM3PZ/WBIZ7XM/eEYAaEyCwvyjq/gk=
 google.golang.org/protobuf v1.36.1/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
+google.golang.org/protobuf v1.36.3 h1:82DV7MYdb8anAVi3qge1wSnMDrnKK7ebr+I0hHRN1BU=
+google.golang.org/protobuf v1.36.3/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
