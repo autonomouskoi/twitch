@@ -105,7 +105,7 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 	if err != nil {
 		return fmt.Errorf("get web FS %w", err)
 	}
-	t.Handler = http.StripPrefix("/m/twitch", http.FileServer(fs))
+	t.Handler = http.FileServer(fs)
 
 	t.cfg = &Config{}
 	if err := t.kv.GetProto(cfgKVKey, t.cfg); err != nil && !errors.Is(err, akcore.ErrNotFound) {
