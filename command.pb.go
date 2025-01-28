@@ -93,61 +93,7 @@ func (MessageTypeCommand) EnumDescriptor() ([]byte, []int) {
 	return file_command_proto_rawDescGZIP(), []int{0}
 }
 
-type BanUserRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Login  string `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
-	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-}
-
-func (x *BanUserRequest) Reset() {
-	*x = BanUserRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *BanUserRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BanUserRequest) ProtoMessage() {}
-
-func (x *BanUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BanUserRequest.ProtoReflect.Descriptor instead.
-func (*BanUserRequest) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *BanUserRequest) GetLogin() string {
-	if x != nil {
-		return x.Login
-	}
-	return ""
-}
-
-func (x *BanUserRequest) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
+// Token stores a twitch OAuth token
 type Token struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -162,7 +108,7 @@ type Token struct {
 func (x *Token) Reset() {
 	*x = Token{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[1]
+		mi := &file_command_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -175,7 +121,7 @@ func (x *Token) String() string {
 func (*Token) ProtoMessage() {}
 
 func (x *Token) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[1]
+	mi := &file_command_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -188,7 +134,7 @@ func (x *Token) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Token.ProtoReflect.Descriptor instead.
 func (*Token) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{1}
+	return file_command_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Token) GetClientId() string {
@@ -219,6 +165,7 @@ func (x *Token) GetUserId() string {
 	return ""
 }
 
+// Profile wraps a token and includes the user login
 type Profile struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -232,7 +179,7 @@ type Profile struct {
 func (x *Profile) Reset() {
 	*x = Profile{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[2]
+		mi := &file_command_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -245,7 +192,7 @@ func (x *Profile) String() string {
 func (*Profile) ProtoMessage() {}
 
 func (x *Profile) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[2]
+	mi := &file_command_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -258,7 +205,7 @@ func (x *Profile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Profile.ProtoReflect.Descriptor instead.
 func (*Profile) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{2}
+	return file_command_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Profile) GetName() string {
@@ -295,7 +242,7 @@ type Config struct {
 func (x *Config) Reset() {
 	*x = Config{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[3]
+		mi := &file_command_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -308,7 +255,7 @@ func (x *Config) String() string {
 func (*Config) ProtoMessage() {}
 
 func (x *Config) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[3]
+	mi := &file_command_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -321,7 +268,7 @@ func (x *Config) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Config.ProtoReflect.Descriptor instead.
 func (*Config) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{3}
+	return file_command_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Config) GetProfiles() map[string]*Profile {
@@ -345,6 +292,7 @@ func (x *Config) GetEsConfig() *EventSubConfig {
 	return nil
 }
 
+// Request a URL to do the OAuth enrollment dance
 type GetOAuthURLRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -354,7 +302,7 @@ type GetOAuthURLRequest struct {
 func (x *GetOAuthURLRequest) Reset() {
 	*x = GetOAuthURLRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[4]
+		mi := &file_command_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -367,7 +315,7 @@ func (x *GetOAuthURLRequest) String() string {
 func (*GetOAuthURLRequest) ProtoMessage() {}
 
 func (x *GetOAuthURLRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[4]
+	mi := &file_command_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -380,7 +328,7 @@ func (x *GetOAuthURLRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOAuthURLRequest.ProtoReflect.Descriptor instead.
 func (*GetOAuthURLRequest) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{4}
+	return file_command_proto_rawDescGZIP(), []int{3}
 }
 
 type GetOAuthURLResponse struct {
@@ -394,7 +342,7 @@ type GetOAuthURLResponse struct {
 func (x *GetOAuthURLResponse) Reset() {
 	*x = GetOAuthURLResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[5]
+		mi := &file_command_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -407,7 +355,7 @@ func (x *GetOAuthURLResponse) String() string {
 func (*GetOAuthURLResponse) ProtoMessage() {}
 
 func (x *GetOAuthURLResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[5]
+	mi := &file_command_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -420,7 +368,7 @@ func (x *GetOAuthURLResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOAuthURLResponse.ProtoReflect.Descriptor instead.
 func (*GetOAuthURLResponse) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{5}
+	return file_command_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetOAuthURLResponse) GetUrl() string {
@@ -441,7 +389,7 @@ type WriteProfileRequest struct {
 func (x *WriteProfileRequest) Reset() {
 	*x = WriteProfileRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[6]
+		mi := &file_command_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -454,7 +402,7 @@ func (x *WriteProfileRequest) String() string {
 func (*WriteProfileRequest) ProtoMessage() {}
 
 func (x *WriteProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[6]
+	mi := &file_command_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -467,7 +415,7 @@ func (x *WriteProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WriteProfileRequest.ProtoReflect.Descriptor instead.
 func (*WriteProfileRequest) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{6}
+	return file_command_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *WriteProfileRequest) GetProfile() *Profile {
@@ -486,7 +434,7 @@ type WriteProfileResponse struct {
 func (x *WriteProfileResponse) Reset() {
 	*x = WriteProfileResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[7]
+		mi := &file_command_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -499,7 +447,7 @@ func (x *WriteProfileResponse) String() string {
 func (*WriteProfileResponse) ProtoMessage() {}
 
 func (x *WriteProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[7]
+	mi := &file_command_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -512,7 +460,7 @@ func (x *WriteProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WriteProfileResponse.ProtoReflect.Descriptor instead.
 func (*WriteProfileResponse) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{7}
+	return file_command_proto_rawDescGZIP(), []int{6}
 }
 
 type DeleteProfileRequest struct {
@@ -526,7 +474,7 @@ type DeleteProfileRequest struct {
 func (x *DeleteProfileRequest) Reset() {
 	*x = DeleteProfileRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[8]
+		mi := &file_command_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -539,7 +487,7 @@ func (x *DeleteProfileRequest) String() string {
 func (*DeleteProfileRequest) ProtoMessage() {}
 
 func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[8]
+	mi := &file_command_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -552,7 +500,7 @@ func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileRequest.ProtoReflect.Descriptor instead.
 func (*DeleteProfileRequest) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{8}
+	return file_command_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *DeleteProfileRequest) GetName() string {
@@ -571,7 +519,7 @@ type DeleteProfileResponse struct {
 func (x *DeleteProfileResponse) Reset() {
 	*x = DeleteProfileResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[9]
+		mi := &file_command_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -584,7 +532,7 @@ func (x *DeleteProfileResponse) String() string {
 func (*DeleteProfileResponse) ProtoMessage() {}
 
 func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[9]
+	mi := &file_command_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -597,7 +545,7 @@ func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileResponse.ProtoReflect.Descriptor instead.
 func (*DeleteProfileResponse) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{9}
+	return file_command_proto_rawDescGZIP(), []int{8}
 }
 
 type ChatSetConfigRequest struct {
@@ -611,7 +559,7 @@ type ChatSetConfigRequest struct {
 func (x *ChatSetConfigRequest) Reset() {
 	*x = ChatSetConfigRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[10]
+		mi := &file_command_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -624,7 +572,7 @@ func (x *ChatSetConfigRequest) String() string {
 func (*ChatSetConfigRequest) ProtoMessage() {}
 
 func (x *ChatSetConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[10]
+	mi := &file_command_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -637,7 +585,7 @@ func (x *ChatSetConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatSetConfigRequest.ProtoReflect.Descriptor instead.
 func (*ChatSetConfigRequest) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{10}
+	return file_command_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ChatSetConfigRequest) GetConfig() *ChatConfig {
@@ -656,7 +604,7 @@ type ChatSetConfigResponse struct {
 func (x *ChatSetConfigResponse) Reset() {
 	*x = ChatSetConfigResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[11]
+		mi := &file_command_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -669,7 +617,7 @@ func (x *ChatSetConfigResponse) String() string {
 func (*ChatSetConfigResponse) ProtoMessage() {}
 
 func (x *ChatSetConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[11]
+	mi := &file_command_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -682,7 +630,7 @@ func (x *ChatSetConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatSetConfigResponse.ProtoReflect.Descriptor instead.
 func (*ChatSetConfigResponse) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{11}
+	return file_command_proto_rawDescGZIP(), []int{10}
 }
 
 type EventSubSetConfigRequest struct {
@@ -696,7 +644,7 @@ type EventSubSetConfigRequest struct {
 func (x *EventSubSetConfigRequest) Reset() {
 	*x = EventSubSetConfigRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[12]
+		mi := &file_command_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -709,7 +657,7 @@ func (x *EventSubSetConfigRequest) String() string {
 func (*EventSubSetConfigRequest) ProtoMessage() {}
 
 func (x *EventSubSetConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[12]
+	mi := &file_command_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -722,7 +670,7 @@ func (x *EventSubSetConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventSubSetConfigRequest.ProtoReflect.Descriptor instead.
 func (*EventSubSetConfigRequest) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{12}
+	return file_command_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *EventSubSetConfigRequest) GetConfig() *EventSubConfig {
@@ -741,7 +689,7 @@ type EventSubSetConfigResponse struct {
 func (x *EventSubSetConfigResponse) Reset() {
 	*x = EventSubSetConfigResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_command_proto_msgTypes[13]
+		mi := &file_command_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -754,7 +702,7 @@ func (x *EventSubSetConfigResponse) String() string {
 func (*EventSubSetConfigResponse) ProtoMessage() {}
 
 func (x *EventSubSetConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_command_proto_msgTypes[13]
+	mi := &file_command_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -767,7 +715,7 @@ func (x *EventSubSetConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventSubSetConfigResponse.ProtoReflect.Descriptor instead.
 func (*EventSubSetConfigResponse) Descriptor() ([]byte, []int) {
-	return file_command_proto_rawDescGZIP(), []int{13}
+	return file_command_proto_rawDescGZIP(), []int{12}
 }
 
 var File_command_proto protoreflect.FileDescriptor
@@ -776,11 +724,7 @@ var file_command_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
 	0x06, 0x74, 0x77, 0x69, 0x74, 0x63, 0x68, 0x1a, 0x0a, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x1a, 0x0e, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x75, 0x62, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x22, 0x3e, 0x0a, 0x0e, 0x42, 0x61, 0x6e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x6f, 0x67, 0x69, 0x6e, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x72,
-	0x65, 0x61, 0x73, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x61,
-	0x73, 0x6f, 0x6e, 0x22, 0x6d, 0x0a, 0x05, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1b, 0x0a, 0x09,
+	0x6f, 0x74, 0x6f, 0x22, 0x6d, 0x0a, 0x05, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1b, 0x0a, 0x09,
 	0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x08, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x63, 0x63,
 	0x65, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x63, 0x63, 0x65, 0x73,
@@ -880,36 +824,35 @@ func file_command_proto_rawDescGZIP() []byte {
 }
 
 var file_command_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_command_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_command_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_command_proto_goTypes = []any{
 	(MessageTypeCommand)(0),           // 0: twitch.MessageTypeCommand
-	(*BanUserRequest)(nil),            // 1: twitch.BanUserRequest
-	(*Token)(nil),                     // 2: twitch.Token
-	(*Profile)(nil),                   // 3: twitch.Profile
-	(*Config)(nil),                    // 4: twitch.Config
-	(*GetOAuthURLRequest)(nil),        // 5: twitch.GetOAuthURLRequest
-	(*GetOAuthURLResponse)(nil),       // 6: twitch.GetOAuthURLResponse
-	(*WriteProfileRequest)(nil),       // 7: twitch.WriteProfileRequest
-	(*WriteProfileResponse)(nil),      // 8: twitch.WriteProfileResponse
-	(*DeleteProfileRequest)(nil),      // 9: twitch.DeleteProfileRequest
-	(*DeleteProfileResponse)(nil),     // 10: twitch.DeleteProfileResponse
-	(*ChatSetConfigRequest)(nil),      // 11: twitch.ChatSetConfigRequest
-	(*ChatSetConfigResponse)(nil),     // 12: twitch.ChatSetConfigResponse
-	(*EventSubSetConfigRequest)(nil),  // 13: twitch.EventSubSetConfigRequest
-	(*EventSubSetConfigResponse)(nil), // 14: twitch.EventSubSetConfigResponse
-	nil,                               // 15: twitch.Config.ProfilesEntry
-	(*ChatConfig)(nil),                // 16: twitch.ChatConfig
-	(*EventSubConfig)(nil),            // 17: twitch.EventSubConfig
+	(*Token)(nil),                     // 1: twitch.Token
+	(*Profile)(nil),                   // 2: twitch.Profile
+	(*Config)(nil),                    // 3: twitch.Config
+	(*GetOAuthURLRequest)(nil),        // 4: twitch.GetOAuthURLRequest
+	(*GetOAuthURLResponse)(nil),       // 5: twitch.GetOAuthURLResponse
+	(*WriteProfileRequest)(nil),       // 6: twitch.WriteProfileRequest
+	(*WriteProfileResponse)(nil),      // 7: twitch.WriteProfileResponse
+	(*DeleteProfileRequest)(nil),      // 8: twitch.DeleteProfileRequest
+	(*DeleteProfileResponse)(nil),     // 9: twitch.DeleteProfileResponse
+	(*ChatSetConfigRequest)(nil),      // 10: twitch.ChatSetConfigRequest
+	(*ChatSetConfigResponse)(nil),     // 11: twitch.ChatSetConfigResponse
+	(*EventSubSetConfigRequest)(nil),  // 12: twitch.EventSubSetConfigRequest
+	(*EventSubSetConfigResponse)(nil), // 13: twitch.EventSubSetConfigResponse
+	nil,                               // 14: twitch.Config.ProfilesEntry
+	(*ChatConfig)(nil),                // 15: twitch.ChatConfig
+	(*EventSubConfig)(nil),            // 16: twitch.EventSubConfig
 }
 var file_command_proto_depIdxs = []int32{
-	2,  // 0: twitch.Profile.token:type_name -> twitch.Token
-	15, // 1: twitch.Config.profiles:type_name -> twitch.Config.ProfilesEntry
-	16, // 2: twitch.Config.chat_config:type_name -> twitch.ChatConfig
-	17, // 3: twitch.Config.es_config:type_name -> twitch.EventSubConfig
-	3,  // 4: twitch.WriteProfileRequest.profile:type_name -> twitch.Profile
-	16, // 5: twitch.ChatSetConfigRequest.config:type_name -> twitch.ChatConfig
-	17, // 6: twitch.EventSubSetConfigRequest.config:type_name -> twitch.EventSubConfig
-	3,  // 7: twitch.Config.ProfilesEntry.value:type_name -> twitch.Profile
+	1,  // 0: twitch.Profile.token:type_name -> twitch.Token
+	14, // 1: twitch.Config.profiles:type_name -> twitch.Config.ProfilesEntry
+	15, // 2: twitch.Config.chat_config:type_name -> twitch.ChatConfig
+	16, // 3: twitch.Config.es_config:type_name -> twitch.EventSubConfig
+	2,  // 4: twitch.WriteProfileRequest.profile:type_name -> twitch.Profile
+	15, // 5: twitch.ChatSetConfigRequest.config:type_name -> twitch.ChatConfig
+	16, // 6: twitch.EventSubSetConfigRequest.config:type_name -> twitch.EventSubConfig
+	2,  // 7: twitch.Config.ProfilesEntry.value:type_name -> twitch.Profile
 	8,  // [8:8] is the sub-list for method output_type
 	8,  // [8:8] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
@@ -926,18 +869,6 @@ func file_command_proto_init() {
 	file_eventsub_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_command_proto_msgTypes[0].Exporter = func(v any, i int) any {
-			switch v := v.(*BanUserRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_command_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*Token); i {
 			case 0:
 				return &v.state
@@ -949,7 +880,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[2].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*Profile); i {
 			case 0:
 				return &v.state
@@ -961,7 +892,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[3].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[2].Exporter = func(v any, i int) any {
 			switch v := v.(*Config); i {
 			case 0:
 				return &v.state
@@ -973,7 +904,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[4].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[3].Exporter = func(v any, i int) any {
 			switch v := v.(*GetOAuthURLRequest); i {
 			case 0:
 				return &v.state
@@ -985,7 +916,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[5].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[4].Exporter = func(v any, i int) any {
 			switch v := v.(*GetOAuthURLResponse); i {
 			case 0:
 				return &v.state
@@ -997,7 +928,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[6].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[5].Exporter = func(v any, i int) any {
 			switch v := v.(*WriteProfileRequest); i {
 			case 0:
 				return &v.state
@@ -1009,7 +940,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[7].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[6].Exporter = func(v any, i int) any {
 			switch v := v.(*WriteProfileResponse); i {
 			case 0:
 				return &v.state
@@ -1021,7 +952,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[8].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[7].Exporter = func(v any, i int) any {
 			switch v := v.(*DeleteProfileRequest); i {
 			case 0:
 				return &v.state
@@ -1033,7 +964,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[9].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[8].Exporter = func(v any, i int) any {
 			switch v := v.(*DeleteProfileResponse); i {
 			case 0:
 				return &v.state
@@ -1045,7 +976,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[10].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[9].Exporter = func(v any, i int) any {
 			switch v := v.(*ChatSetConfigRequest); i {
 			case 0:
 				return &v.state
@@ -1057,7 +988,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[11].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[10].Exporter = func(v any, i int) any {
 			switch v := v.(*ChatSetConfigResponse); i {
 			case 0:
 				return &v.state
@@ -1069,7 +1000,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[12].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[11].Exporter = func(v any, i int) any {
 			switch v := v.(*EventSubSetConfigRequest); i {
 			case 0:
 				return &v.state
@@ -1081,7 +1012,7 @@ func file_command_proto_init() {
 				return nil
 			}
 		}
-		file_command_proto_msgTypes[13].Exporter = func(v any, i int) any {
+		file_command_proto_msgTypes[12].Exporter = func(v any, i int) any {
 			switch v := v.(*EventSubSetConfigResponse); i {
 			case 0:
 				return &v.state
@@ -1100,7 +1031,7 @@ func file_command_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_command_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   15,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
