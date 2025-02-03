@@ -43,6 +43,7 @@ var (
 func init() {
 	manifest := &modules.Manifest{
 		Id:          "27cff9c0fb8385a6",
+		Title:       "Twitch",
 		Name:        "twitch",
 		Description: "Integration with Twitch APIs",
 		WebPaths: []*modules.ManifestWebPath{
