@@ -146,3 +146,10 @@ func extractError(err error, rc helix.ResponseCommon) error {
 	}
 	return errors.New(rc.ErrorMessage)
 }
+
+//go:embed icon.svg
+var icon []byte
+
+func (*Twitch) Icon() ([]byte, string, error) {
+	return icon, "image/svg+xml", nil
+}
