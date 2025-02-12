@@ -116,7 +116,8 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 
 	for name, profile := range t.cfg.Profiles {
 		if err := t.addProfile(profile); err != nil {
-			return fmt.Errorf("adding profile %s: %w", name, err)
+			t.Log.Error("adding profile", "profile", profile.Name, "error", err)
+			continue
 		}
 		t.Log.Debug("loaded profile", "name", name)
 	}

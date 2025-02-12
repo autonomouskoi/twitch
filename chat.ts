@@ -85,8 +85,6 @@ section {
                 };
                 this.appendCMI(cm);
                 break;
-            default:
-                throw (`Unhandled message type ${msg.getType()}`);
         }
     }
     appendCMI(cm: ChatMessage) {

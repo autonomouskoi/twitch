@@ -1,6 +1,7 @@
 package twitch
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -48,6 +49,13 @@ func (t *Twitch) addProfile(profile *Profile) error {
 	client, err := newClient(profile.Token)
 	if err != nil {
 		return fmt.Errorf("creating client: %w", err)
+	}
+	valid, _, err := client.ValidateToken(profile.Token.Access)
+	if err != nil {
+		return fmt.Errorf("validating token: %w", err)
+	}
+	if !valid {
+		return errors.New("invalid token")
 	}
 	t.clients[profile.Name] = client
 	return nil
