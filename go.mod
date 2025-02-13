@@ -3,7 +3,7 @@ module github.com/autonomouskoi/twitch
 go 1.22.1
 
 require (
-	github.com/autonomouskoi/akcore v0.0.15
+	github.com/autonomouskoi/akcore v0.0.16
 	github.com/autonomouskoi/datastruct v0.0.13
 	github.com/autonomouskoi/mageutil v0.0.15
 	github.com/magefile/mage v1.15.0
