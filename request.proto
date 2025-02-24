@@ -19,6 +19,8 @@ enum MessageTypeRequest {
     TYPE_REQUEST_EVENT_GET_STATUS_RESP  = 8;
     TYPE_REQUEST_GET_USER_REQ           = 9;
     TYPE_REQUEST_GET_USER_RESP          = 10;
+    TYPE_REQUEST_SEND_SHOUTOUT_REQ      = 11;
+    TYPE_REQUEST_SEND_SHOUTOUT_RESP     = 12;
 }
 
 message ListProfilesRequest {}
@@ -60,3 +62,10 @@ message GetUserResponse {
     string  login = 1;
     User    user  = 2;
 }
+
+message SendShoutoutRequest {
+    string  from_profile      = 1;
+    string  to_broadcaster_id  = 2;
+    string  moderator_id       = 3;
+}
+message SendShoutoutResponse {}

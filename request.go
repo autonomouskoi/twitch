@@ -19,6 +19,7 @@ func (t *Twitch) handleRequest(ctx context.Context) error {
 			int32(MessageTypeRequest_TYPE_REQUEST_CHAT_GET_CONFIG_REQ):  t.handleChatGetConfigRequest,
 			int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_CONFIG_REQ): t.handleEventSubGetConfigRequest,
 			int32(MessageTypeRequest_TYPE_REQUEST_EVENT_GET_STATUS_REQ): t.handleEventSubGetStatusRequest,
+			int32(MessageTypeRequest_TYPE_REQUEST_SEND_SHOUTOUT_REQ):    t.handleRequestSendShoutout,
 		},
 		nil,
 	)

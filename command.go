@@ -28,6 +28,7 @@ var (
 		"chat:edit",
 		"chat:read",
 		"moderator:manage:banned_users",
+		"moderator:manage:shoutouts",
 		"moderator:read:followers",
 		"user:read:chat",
 		"user:write:chat",

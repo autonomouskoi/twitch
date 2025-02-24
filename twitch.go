@@ -80,7 +80,8 @@ type Twitch struct {
 
 	cacheUsers ttlcache.Cache[string, *User]
 
-	eventSub *eventSub
+	eventSub  *eventSub
+	shoutouts *shoutouts
 }
 
 //go:embed web.zip
@@ -121,6 +122,8 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 		}
 		t.Log.Debug("loaded profile", "name", name)
 	}
+
+	t.shoutouts = newShoutouts(ctx, t.Log, t.clients)
 
 	eg, ctx := errgroup.WithContext(ctx)
 
