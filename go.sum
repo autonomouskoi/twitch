@@ -10,6 +10,8 @@ github.com/autonomouskoi/akcore v0.0.15 h1:cGx5stUy6M4t8Cvt5bEGm4xIF6X/MgIPORgLZ
 github.com/autonomouskoi/akcore v0.0.15/go.mod h1:93GhtiB/RHVX6WdHv3AP/VT/T/amxCkxqOqMf3Z8MWg=
 github.com/autonomouskoi/akcore v0.0.16 h1:pzkYPVaeMlUsSxQBZcMz9KshY6zPZ9s23uMXs5MeNuw=
 github.com/autonomouskoi/akcore v0.0.16/go.mod h1:93GhtiB/RHVX6WdHv3AP/VT/T/amxCkxqOqMf3Z8MWg=
+github.com/autonomouskoi/akcore v0.0.17 h1:f9cjcbmkt6Z858rJMjitYk2olLUs3l5Q8bbiVNTw3u8=
+github.com/autonomouskoi/akcore v0.0.17/go.mod h1:93GhtiB/RHVX6WdHv3AP/VT/T/amxCkxqOqMf3Z8MWg=
 github.com/autonomouskoi/datastruct v0.0.0-20241128030344-91fb33460053 h1:+QY4Da5HmF0ABRvwviMDk9OtHbcA/6DdmZQjEF5+5Ss=
 github.com/autonomouskoi/datastruct v0.0.0-20241128030344-91fb33460053/go.mod h1:vavjFRRPddUMUKJW2n71OFfKCMqriBQZYaScP7ZZz48=
 github.com/autonomouskoi/datastruct v0.0.13 h1:EuEbJLhBPSOgUNegRQKZ370TRtifVcXYijrQaVMN0fs=
