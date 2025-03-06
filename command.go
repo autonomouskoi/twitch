@@ -10,11 +10,16 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"google.golang.org/protobuf/proto"
 
 	"github.com/autonomouskoi/akcore/bus"
+)
+
+const (
+	defaultOAuthURL = "https://id.twitch.tv/oauth2/authorize"
 )
 
 var (
@@ -53,7 +58,7 @@ func (t *Twitch) handleCommand(ctx context.Context) error {
 // handle a request for an OAuth dance URL. The response will be handled by a
 // dedicated HTTP handler. this could probably be updated to use the webhook
 // mechanism
-func (t *Twitch) handleCommandGetOAuthURL(reqMsg *bus.BusMessage) *bus.BusMessage {
+func (t *Twitch) handleCommandGetOAuthURL(msg *bus.BusMessage) *bus.BusMessage {
 	query := url.Values{}
 	query.Set("client_id", clientID)
 	query.Set("redirect_uri", "http://localhost:8011/m/twitch/oauth.html")
@@ -63,28 +68,34 @@ func (t *Twitch) handleCommandGetOAuthURL(reqMsg *bus.BusMessage) *bus.BusMessag
 	binary.Write(buf, binary.BigEndian, rand.Int63())
 	state := t.oauthStateToken(hex.EncodeToString(buf.Bytes()))
 	query.Set("state", state)
-	redirURL := url.URL{
-		Scheme:   "https",
-		Host:     "id.twitch.tv",
-		Path:     "/oauth2/authorize",
-		RawQuery: query.Encode(),
+
+	oAuthURLStr := defaultOAuthURL
+	if v := os.Getenv("TWITCH_OAUTH_URL"); v != "" {
+		oAuthURLStr = v
 	}
+	reply := &bus.BusMessage{
+		Topic: msg.GetTopic(),
+		Type:  int32(MessageTypeCommand_TYPE_COMMAND_GET_OAUTH_URL_RES),
+	}
+	redirURL, err := url.Parse(oAuthURLStr)
+	if err != nil {
+		reply.Error.Detail = proto.String("parsing OAuth URL: " + err.Error())
+		return reply
+	}
+
+	redirURL.RawQuery = query.Encode()
 	b, err := proto.Marshal(&GetOAuthURLResponse{
 		Url: redirURL.String(),
 	})
-	msg := &bus.BusMessage{
-		Topic: reqMsg.GetTopic(),
-		Type:  int32(MessageTypeCommand_TYPE_COMMAND_GET_OAUTH_URL_RES),
-	}
 	if err != nil {
 		t.Log.Error("marshalling", "type", "GetOAuthURLResposne", "error", err.Error())
-		msg.Error = &bus.Error{
+		reply.Error = &bus.Error{
 			Detail: proto.String("marshalling: " + err.Error()),
 		}
-		return msg
+		return reply
 	}
-	msg.Message = b
-	return msg
+	reply.Message = b
+	return reply
 }
 
 // handle a request to write a profile. This will be invoked by oauth handler
