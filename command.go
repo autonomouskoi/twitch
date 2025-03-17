@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"google.golang.org/protobuf/proto"
 
@@ -88,7 +89,7 @@ func (t *Twitch) handleCommandGetOAuthURL(msg *bus.BusMessage) *bus.BusMessage {
 		Url: redirURL.String(),
 	})
 	if err != nil {
-		t.Log.Error("marshalling", "type", "GetOAuthURLResposne", "error", err.Error())
+		t.Log.Error("marshalling", "type", "GetOAuthURLResponse", "error", err.Error())
 		reply.Error = &bus.Error{
 			Detail: proto.String("marshalling: " + err.Error()),
 		}
@@ -140,6 +141,7 @@ func (t *Twitch) handleCommandWriteProfile(reqMsg *bus.BusMessage) *bus.BusMessa
 	valid, validationResp, err := client.ValidateToken(token.Access)
 	profile.Name = validationResp.Data.Login
 	profile.Token.UserId = validationResp.Data.UserID
+	profile.Token.Expires = time.Now().Add(time.Second * time.Duration(validationResp.Data.ExpiresIn)).Unix()
 	if err != nil {
 		t.Log.Error("validating new token", "error", err.Error())
 		msg.Error = &bus.Error{
@@ -262,8 +264,10 @@ func (t *Twitch) handleChatSetConfigRequest(msg *bus.BusMessage) *bus.BusMessage
 	}
 	t.lock.Lock()
 	t.cfg.ChatConfig = scr.Config
+	reply.Message, _ = proto.Marshal(&ChatSetConfigResponse{
+		Config: t.cfg.ChatConfig,
+	})
 	t.lock.Unlock()
-	reply.Message, _ = proto.Marshal(&ChatSetConfigResponse{})
 	return reply
 }
 
@@ -284,12 +288,14 @@ func (t *Twitch) handleEventSubSetConfigRequest(reqMsg *bus.BusMessage) *bus.Bus
 	}
 	t.lock.Lock()
 	t.cfg.EsConfig = scr.Config
+	t.MarshalMessage(msg, &EventSubSetConfigResponse{
+		Config: t.cfg.EsConfig,
+	})
 	t.lock.Unlock()
 	if scr.Config.Enabled {
 		t.startEventSub()
 	} else {
 		t.stopEventSub()
 	}
-	msg.Message, _ = proto.Marshal(&ChatSetConfigResponse{})
 	return msg
 }

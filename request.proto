@@ -26,6 +26,13 @@ enum MessageTypeRequest {
 message ListProfilesRequest {}
 message ListProfilesResponse {
     repeated  string  names = 1;
+    message ProfileListing {
+                 string  name    = 1;
+                 string  user_id = 2;
+        repeated string  scopes  = 3;
+                 int64   expires = 4;
+    }
+    repeated  ProfileListing  profiles = 2;
 }
 
 message ChatGetConfigRequest {}

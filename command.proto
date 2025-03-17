@@ -27,6 +27,7 @@ message Token {
               string  access    = 2;
     repeated  string  scopes    = 3;
               string  user_id   = 4;
+              int64   expires   = 5;
 }
 
 // Profile wraps a token and includes the user login
@@ -61,9 +62,13 @@ message DeleteProfileResponse {}
 message ChatSetConfigRequest {
     ChatConfig  config = 1;
 }
-message ChatSetConfigResponse {}
+message ChatSetConfigResponse {
+    ChatConfig config = 1;
+}
 
 message EventSubSetConfigRequest {
     EventSubConfig  config = 1;
 }
-message EventSubSetConfigResponse {}
+message EventSubSetConfigResponse {
+    EventSubConfig  config = 1;
+}

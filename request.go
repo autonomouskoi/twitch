@@ -34,8 +34,14 @@ func (t *Twitch) handleRequestListProfiles(reqMsg *bus.BusMessage) *bus.BusMessa
 	t.lock.Lock()
 	defer t.lock.Unlock()
 	lpr := &ListProfilesResponse{}
-	for profileName := range t.cfg.Profiles {
+	for profileName, profile := range t.cfg.Profiles {
 		lpr.Names = append(lpr.Names, profileName)
+		lpr.Profiles = append(lpr.Profiles, &ListProfilesResponse_ProfileListing{
+			Name:    profileName,
+			UserId:  profile.GetUserId(),
+			Scopes:  profile.GetToken().GetScopes(),
+			Expires: profile.GetToken().GetExpires(),
+		})
 	}
 	t.MarshalMessage(reply, lpr)
 	return reply

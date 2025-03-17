@@ -3,14 +3,32 @@ import * as buspb from "/pb/bus/bus_pb.js";
 import * as commandpb from "/m/twitch/pb/command_pb.js";
 import * as requestpb from "/m/twitch/pb/request_pb.js";
 import * as twitchpb from "/m/twitch/pb/twitch_pb.js";
+import { ControlPanel } from "/tk.js";
 
 const TOPIC_COMMAND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_COMMAND);
 const TOPIC_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_REQUEST);
 
+const TWO_WEEKS = 1000 * 60 * 60 * 24 * 14;
+
+function profileSymbol(profile: requestpb.ListProfilesResponse_ProfileListing): string {
+    let expires = Number(profile.expires);
+    if (expires == 0) {
+        return '¯\\_(ツ)_/¯';
+    }
+    let now = new Date().getTime();
+    if (expires <= now) {
+        return '&#x274C';
+    }
+    if ((expires - now) < TWO_WEEKS) {
+        return '&#x23F0';
+    }
+    return '&#x2705;';
+}
+
 // create a button that will prompt to delete a profile
-function profileButton(name: string, onsuccess: (name: string) => void): HTMLButtonElement {
+function profileButton(profile: requestpb.ListProfilesResponse_ProfileListing, onsuccess: (name: string) => void): HTMLButtonElement {
     let button = document.createElement('button') as HTMLButtonElement;
-    button.innerHTML = '&#x1F5D1; ' + name;
+    button.innerHTML = `&#x1F5D1; ${profile.name} ${profileSymbol(profile)}`;
     button.addEventListener('click', () => {
         if (!window.confirm(`Really delete connection to ${name}?`)) {
             return;
@@ -19,14 +37,14 @@ function profileButton(name: string, onsuccess: (name: string) => void): HTMLBut
         msg.topic = TOPIC_COMMAND;
         msg.type = commandpb.MessageTypeCommand.TYPE_COMMAND_DELETE_PROFILE_REQ;
         let dpr = new commandpb.DeleteProfileRequest();
-        dpr.name = name;
+        dpr.name = profile.name;
         msg.message = dpr.toBinary();
         bus.sendWithReply(msg, (reply) => {
             if (reply.error) {
                 alert(`error deleting ${name}: ${reply.error.detail}`);
                 return;
             }
-            onsuccess(name);
+            onsuccess(profile.name);
         });
     });
     return button;
@@ -70,39 +88,122 @@ class NewProfile extends HTMLElement {
 }
 customElements.define('twitch-new-profile', NewProfile);
 
-class Profiles extends HTMLElement {
+let profilesHelp = document.createElement('div');
+profilesHelp.innerHTML = `
+<p>
+The <code>twitch</code> module can have tokens from multiple accounts. The account
+used to talk to the Twitch API can be different than the account used to interact
+with chat.
+</p>
+
+<p>
+The <em>New Connection</em> button will create a link to get a token from Twitch.
+The link can be clicked or copyed and pasted into a different browser. The link
+will request a token from Twitch tied to the Twitch account the browser is logged
+into. To get a token tied to a different account, you may need to log into that
+account in a different browser or a Private/Incognito window. The link will become
+invalid if AutonomousKoi or the <code>twitch</code> module is restarted.
+</p>
+
+<p>
+A button will be shown for each account the <code>twitch</code> module has a token
+for. Clicking the button will show a confirmation to remove the token. If you confirm
+the deletion, the <code>twitch</code> module will tell Twitch to invalidate the
+token and then it will delete its copy of the token.
+</p>
+
+<p>
+A symbol is displayed next to the profile name indicating its status:
+<dl>
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing())}</dt>
+    <dd>The profile was created before AK saved the expiration :(</dd>
+
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ expires: BigInt(new Date().getTime() + 5000) }))}</dt>
+    <dd>The token will expire in less than two weeks</dd>
+
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ expires: BigInt(new Date().getTime() - 5000) }))}</dt>
+    <dd>The token is expired</dd>
+
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ expires: BigInt(new Date().getTime() + 5 + TWO_WEEKS) }))}</dt>
+    <dd>The token isn't expiring soon</dd>
+</dl>
+</p>
+`;
+
+class Profiles extends ControlPanel {
     constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+        super({ title: 'Connected Twitch Accounts', help: profilesHelp });
         bus.waitForTopic(TOPIC_REQUEST, 5000).then(() => this.update());
     }
 
     update() {
-        this.shadowRoot.innerHTML = `
-<fieldset>
-<legend>Connected Twitch Accounts</legend>
+        this.innerHTML = `
 <div id="connected"></div>
 <twitch-new-profile></twitch-new-profile>
-</fieldset>
 `;
         let msg = new buspb.BusMessage();
         msg.topic = TOPIC_REQUEST;
         msg.type = requestpb.MessageTypeRequest.TYPE_REQUEST_LIST_PROFILES_REQ;
         msg.message = new requestpb.ListProfilesRequest().toBinary();
         bus.sendWithReply(msg, (reply) => {
-            let connectedContainer = this.shadowRoot.querySelector("#connected") as HTMLElement;
+            let connectedContainer = this.querySelector("#connected") as HTMLElement;
             if (reply.error) {
                 connectedContainer.innerText = `error getting profiles: ${reply.error.detail}`;
                 return;
             }
             let lpr = requestpb.ListProfilesResponse.fromBinary(reply.message);
-            lpr.names.toSorted().forEach((name: string) => {
-                let button = profileButton(name, () => this.update());
-                connectedContainer.appendChild(button);
-            });
+            lpr.profiles
+                .toSorted((a, b) => a.name.localeCompare(b.name))
+                .forEach((profile) => {
+                    let button = profileButton(profile, () => this.update());
+                    connectedContainer.appendChild(button);
+                });
         });
     }
 }
-customElements.define('twitch-profiles', Profiles);
+customElements.define('twitch-profiles', Profiles, { extends: 'fieldset' });
 
-export { Profiles };
+class ProfileSelector extends HTMLElement {
+    private _select: HTMLSelectElement;
+
+    constructor() {
+        super();
+
+        this._select = document.createElement('select');
+        this.appendChild(this._select);
+
+        this.update();
+    }
+
+    update() {
+        bus.waitForTopic(TOPIC_REQUEST, 5000)
+            .then(() => bus.sendAnd(new buspb.BusMessage({
+                topic: TOPIC_REQUEST,
+                type: requestpb.MessageTypeRequest.TYPE_REQUEST_LIST_PROFILES_REQ,
+                message: new requestpb.ListProfilesRequest().toBinary(),
+            })))
+            .then((reply) => {
+                let resp = requestpb.ListProfilesResponse.fromBinary(reply.message);
+                this._select.textContent = '';
+                resp.profiles
+                    .toSorted((a, b) => a.name.localeCompare(b.name))
+                    .forEach((profile) => {
+                        let option = document.createElement('option');
+                        option.value = profile.name;
+                        option.innerText = `${profile.name} ${profileSymbol(profile)}`;
+                        this._select.appendChild(option);
+                    });
+            });
+    }
+
+    get value(): string {
+        return this._select.value;
+    }
+
+    set value(v: string) {
+        this._select.value = v;
+    }
+}
+customElements.define('twitch-profile-select', ProfileSelector);
+
+export { Profiles, ProfileSelector };
