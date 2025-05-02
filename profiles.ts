@@ -8,14 +8,15 @@ import { ControlPanel } from "/tk.js";
 const TOPIC_COMMAND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_COMMAND);
 const TOPIC_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_REQUEST);
 
-const TWO_WEEKS = 1000 * 60 * 60 * 24 * 14;
+const TWO_WEEKS = 60 * 60 * 24 * 14;
 
 function profileSymbol(profile: requestpb.ListProfilesResponse_ProfileListing): string {
     let expires = Number(profile.expires);
     if (expires == 0) {
         return '¯\\_(ツ)_/¯';
     }
-    let now = new Date().getTime();
+    let now = new Date().getTime() / 1000;
+    console.debug(`DEBUG profile ${profile.name} expires ${expires} vs ${now}`);
     if (expires <= now) {
         return '&#x274C';
     }
@@ -118,13 +119,13 @@ A symbol is displayed next to the profile name indicating its status:
     <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing())}</dt>
     <dd>The profile was created before AK saved the expiration :(</dd>
 
-    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ expires: BigInt(new Date().getTime() + 5000) }))}</dt>
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ name: 'soon', expires: BigInt(Math.floor(new Date().getTime() / 1000) + 5) }))}</dt>
     <dd>The token will expire in less than two weeks</dd>
 
-    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ expires: BigInt(new Date().getTime() - 5000) }))}</dt>
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ name: 'expired', expires: BigInt(Math.floor(new Date().getTime() / 1000) - 5) }))}</dt>
     <dd>The token is expired</dd>
 
-    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ expires: BigInt(new Date().getTime() + 5 + TWO_WEEKS) }))}</dt>
+    <dt>${profileSymbol(new requestpb.ListProfilesResponse_ProfileListing({ name: 'good', expires: BigInt(Math.floor(new Date().getTime() / 1000) + 5 + TWO_WEEKS) }))}</dt>
     <dd>The token isn't expiring soon</dd>
 </dl>
 </p>
@@ -190,7 +191,8 @@ class ProfileSelector extends HTMLElement {
                     .forEach((profile) => {
                         let option = document.createElement('option');
                         option.value = profile.name;
-                        option.innerText = `${profile.name} ${profileSymbol(profile)}`;
+                        option.innerText = profile.name;
+                        option.innerHTML += ` ${profileSymbol(profile)}`;
                         this._select.appendChild(option);
                     });
             });
