@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/nicklaw5/helix/v2"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/autonomouskoi/akcore"
@@ -125,14 +124,12 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 
 	t.shoutouts = newShoutouts(ctx, t.Log, t.clients)
 
-	eg, ctx := errgroup.WithContext(ctx)
+	t.Go(func() error { return t.handleRequest(ctx) })
+	t.Go(func() error { return t.handleCommand(ctx) })
+	t.Go(func() error { return t.handleChat(ctx) })
+	t.Go(func() error { return t.handleEventSub(ctx) })
 
-	eg.Go(func() error { return t.handleRequest(ctx) })
-	eg.Go(func() error { return t.handleCommand(ctx) })
-	eg.Go(func() error { return t.handleChat(ctx) })
-	eg.Go(func() error { return t.handleEventSub(ctx) })
-
-	return eg.Wait()
+	return t.Wait()
 }
 
 func (t *Twitch) writeCfg() {
