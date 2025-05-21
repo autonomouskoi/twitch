@@ -2,11 +2,11 @@ package twitch
 
 import (
 	"context"
-	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/autonomouskoi/akcore/bus"
+	"github.com/autonomouskoi/akcore/svc/log"
 	"github.com/nicklaw5/helix/v2"
 )
 
@@ -32,11 +32,11 @@ type shoutouts struct {
 	clients map[string]*client
 	queue   chan *SendShoutoutRequest
 	recent  map[string]time.Time
-	log     *slog.Logger
+	log     log.Logger
 	lock    sync.Mutex
 }
 
-func newShoutouts(ctx context.Context, log *slog.Logger, clients map[string]*client) *shoutouts {
+func newShoutouts(ctx context.Context, log log.Logger, clients map[string]*client) *shoutouts {
 	so := &shoutouts{
 		log:     log,
 		clients: clients,

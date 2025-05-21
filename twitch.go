@@ -98,7 +98,7 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 		parentCtx: ctx,
 		seen:      newSeenIDs(),
 	}
-	t.eventSub.Log = deps.Log.With("module", "twitcheventsub")
+	t.eventSub.Log = t.Log
 
 	t.cacheUsers = ttlcache.New[string, *User](ctx, time.Minute*15, time.Minute)
 
