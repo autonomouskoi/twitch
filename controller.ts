@@ -26,9 +26,6 @@ class ChatCfg extends ValueUpdater<twitchpb.chat.ChatConfig> {
     }
 
     save(cfg: twitchpb.chat.ChatConfig): Promise<void> {
-        let cscr = new twitchpb.command.ChatSetConfigRequest({
-            config: cfg,
-        });
         return bus.sendAnd(new buspb.BusMessage({
             topic: TOPIC_COMMAND,
             type: twitchpb.command.MessageTypeCommand.TYPE_COMMAND_CHAT_SET_CONFIG_REQ,
