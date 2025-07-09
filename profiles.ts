@@ -16,7 +16,6 @@ function profileSymbol(profile: requestpb.ListProfilesResponse_ProfileListing): 
         return '¯\\_(ツ)_/¯';
     }
     let now = new Date().getTime() / 1000;
-    console.debug(`DEBUG profile ${profile.name} expires ${expires} vs ${now}`);
     if (expires <= now) {
         return '&#x274C';
     }
