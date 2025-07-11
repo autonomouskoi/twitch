@@ -163,14 +163,10 @@ class Profiles extends ControlPanel {
 }
 customElements.define('twitch-profiles', Profiles, { extends: 'fieldset' });
 
-class ProfileSelector extends HTMLElement {
-    private _select: HTMLSelectElement;
+class ProfileSelector extends HTMLSelectElement {
 
     constructor() {
         super();
-
-        this._select = document.createElement('select');
-        this.appendChild(this._select);
 
         this.update();
     }
@@ -184,7 +180,7 @@ class ProfileSelector extends HTMLElement {
             })))
             .then((reply) => {
                 let resp = requestpb.ListProfilesResponse.fromBinary(reply.message);
-                this._select.textContent = '';
+                this.textContent = '';
                 resp.profiles
                     .toSorted((a, b) => a.name.localeCompare(b.name))
                     .forEach((profile) => {
@@ -192,19 +188,11 @@ class ProfileSelector extends HTMLElement {
                         option.value = profile.name;
                         option.innerText = profile.name;
                         option.innerHTML += ` ${profileSymbol(profile)}`;
-                        this._select.appendChild(option);
+                        this.appendChild(option);
                     });
             });
     }
-
-    get value(): string {
-        return this._select.value;
-    }
-
-    set value(v: string) {
-        this._select.value = v;
-    }
 }
-customElements.define('twitch-profile-select', ProfileSelector);
+customElements.define('twitch-profile-select', ProfileSelector, { extends: 'select' });
 
 export { Profiles, ProfileSelector };
