@@ -41,18 +41,27 @@ func (t *Twitch) handleChatSendRequest(msg *bus.BusMessage) *bus.BusMessage {
 	if sr.Text == "" {
 		return nil
 	}
+	profile := defaultValue(sr.GetProfile(), t.cfg.GetChatConfig().GetProfile())
 	t.lock.Lock()
-	client := t.clients[t.cfg.GetChatConfig().GetProfile()]
+	client := t.clients[profile]
 	t.lock.Unlock()
 	if client == nil {
 		reply.Error = &bus.Error{
 			Code:        int32(bus.CommonErrorCode_NOT_FOUND),
-			UserMessage: proto.String("no profile: " + t.cfg.GetChatConfig().GetProfile()),
+			UserMessage: proto.String("no profile: " + profile),
+		}
+		return reply
+	}
+	channelClient := t.clients[defaultValue(sr.GetChannel(), client.UserID())]
+	if channelClient == nil {
+		reply.Error = &bus.Error{
+			Code:        int32(bus.CommonErrorCode_NOT_FOUND),
+			UserMessage: proto.String("no profile: " + profile),
 		}
 		return reply
 	}
 	resp, err := client.SendChatMessage(&helix.SendChatMessageParams{
-		BroadcasterID: client.UserID(),
+		BroadcasterID: channelClient.UserID(),
 		SenderID:      client.UserID(),
 		Message:       t.cfg.ChatConfig.MessagePrefix + sr.GetText(),
 	})

@@ -117,9 +117,9 @@ customElements.define('twitch-chat', LiveChat);
 let help = document.createElement('div');
 help.innerHTML = `
 <p>
-The <em>Using Account</em> selector allows you to choose which connected Twitch
-account to use for chat. You must hit the <em>Save</em> button to save this setting
-and it won't take effect until the next time chat connects.
+The <em>Default Sender</em> selector allows you to choose which connected Twitch
+account to use for sending chat messages. Modules and plugins can choose from all profiles.
+You must hit the <em>Save</em> button to save this setting.
 </p>
 
 <p>
@@ -139,15 +139,16 @@ class ChatConfig extends UpdatingControlPanel<chatpb.ChatConfig> {
     constructor(cfg: ChatCfg) {
         super({ title: 'Chat Config', help, data: cfg })
 
+        const profileTitle = 'Send chat messages as this profile when none is specified';
+
         this.innerHTML = `
 <form method="dialog">
 <section class="grid grid-2-col">
 
-<label for="select-profile">Using Account</label>
-<twitch-profile-select id="select-profile"></twitch-profile-select>
+<label for="select-profile" title="${profileTitle}">Default Sender</label>
 
-<label for="input-prefix">Chat Message Prefix</label>
-<input id="input-prefix" type="text" />
+<label for="input-prefix" title="Put this in front of each chat message sent">Chat Message Prefix</label>
+<input id="input-prefix" type="text" title="Put this in front of each chat message sent" />
 
 <input type="submit" value="Save" />
 
@@ -159,7 +160,10 @@ class ChatConfig extends UpdatingControlPanel<chatpb.ChatConfig> {
 </section>
 `;
 
-        this._profile = this.querySelector('#select-profile');
+        let profileLabel = this.querySelector('label[for="select-profile"]');
+        this._profile = new ProfileSelector();
+        this._profile.id = 'select-profile';
+        profileLabel.after(this._profile);
         this._prefix = this.querySelector('input');
 
         this.querySelector('form').addEventListener('submit', () => {
@@ -172,7 +176,7 @@ class ChatConfig extends UpdatingControlPanel<chatpb.ChatConfig> {
 
     update(cfg: chatpb.ChatConfig) {
         this._prefix.value = cfg.messagePrefix;
-        this._profile.value = cfg.profile;
+        this._profile.selected = cfg.profile;
     }
 }
 customElements.define('twitch-chat-config', ChatConfig, { extends: 'fieldset' });

@@ -52,7 +52,7 @@ func All() {
 func Dev() {
 	mg.Deps(
 		GoProtos,
-		WebSrc,
+		Web,
 	)
 }
 
@@ -84,7 +84,7 @@ func WebSrcCopy() error {
 	return nil
 }
 
-func WebSrc() {
+func Web() {
 	mg.Deps(
 		WebSrcCopy,
 		TS,
@@ -92,7 +92,7 @@ func WebSrc() {
 }
 
 func WebZip() error {
-	mg.Deps(WebSrc)
+	mg.Deps(Web)
 
 	zipPath := filepath.Join(baseDir, "web.zip")
 	if err := sh.Rm(zipPath); err != nil {

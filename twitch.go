@@ -148,6 +148,14 @@ func extractError(err error, rc helix.ResponseCommon) error {
 	return errors.New(rc.ErrorMessage)
 }
 
+func defaultValue[T comparable](a, b T) T {
+	var v T
+	if a == v {
+		return b
+	}
+	return a
+}
+
 //go:embed icon.svg
 var icon []byte
 

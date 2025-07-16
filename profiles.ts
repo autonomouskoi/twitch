@@ -165,8 +165,17 @@ customElements.define('twitch-profiles', Profiles, { extends: 'fieldset' });
 
 class ProfileSelector extends HTMLSelectElement {
 
+    private _populated: Promise<void>;
+    private _resolve: (value: void | PromiseLike<void>) => void;
+    private _reject: (reason?: any) => void;
+
     constructor() {
         super();
+
+        this._populated = new Promise<void>((resolve, reject) => {
+            this._resolve = resolve;
+            this._reject = reject;
+        });
 
         this.update();
     }
@@ -177,8 +186,7 @@ class ProfileSelector extends HTMLSelectElement {
                 topic: TOPIC_REQUEST,
                 type: requestpb.MessageTypeRequest.TYPE_REQUEST_LIST_PROFILES_REQ,
                 message: new requestpb.ListProfilesRequest().toBinary(),
-            })))
-            .then((reply) => {
+            }))).then((reply) => {
                 let resp = requestpb.ListProfilesResponse.fromBinary(reply.message);
                 this.textContent = '';
                 resp.profiles
@@ -190,7 +198,12 @@ class ProfileSelector extends HTMLSelectElement {
                         option.innerHTML += ` ${profileSymbol(profile)}`;
                         this.appendChild(option);
                     });
-            });
+                this._resolve();
+            }).catch((e) => this._reject(e));
+    }
+
+    set selected(value: string) {
+        this._populated.then(() => this.value = value);
     }
 }
 customElements.define('twitch-profile-select', ProfileSelector, { extends: 'select' });

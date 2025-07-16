@@ -75,7 +75,7 @@ receive events.
 
 <p>
 The <em>Using Account</em> selector allows you to choose which connected Twitch
-account to use for receiving events. You must hit the <em>Save</em> button to
+account to use for receiving events and chat messages. You must hit the <em>Save</em> button to
 save this setting and it won't take effect until the next time chat connects.
 </p>
 
@@ -99,21 +99,21 @@ class EventSubConfig extends UpdatingControlPanel<eventsubpb.EventSubConfig> {
 
     constructor(cfg: EventCfg) {
         super({ title: 'EventSub Config', help, data: cfg })
+        const profileTitle = 'Receive Twitch events and chat messages via this profile';
         this.innerHTML = `
 <form method="dialog">
 <section class="grid grid-2-col">
 
-<label>Status</label>
+<label title="Connection status">Status</label>
 <twitch-es-status></twitch-es-status>
 
-<label for="select-profile">Using Account</label>
-<twitch-profile-select id="select-profile"></twitch-profile-select>
+<label for="select-profile" title="${profileTitle}">Using Account</label>
 
-<label for="enabled">Enabled</label>
-<input type="checkbox" id="enabled" />
+<label for="enabled" title="Connect to Twitch events and chat">Enabled</label>
+<input type="checkbox" id="enabled" title="Connect to Twitch events and chat" />
 
-<label for="log">Log Raw Events</label>
-<input type="checkbox" id="log" />
+<label for="log" title="Keep a log of all Twitch events">Log Raw Events</label>
+<input type="checkbox" id="log" title="Keep a log of all Twitch events" />
 
 <input type="submit" value="Save" />
 
@@ -123,7 +123,10 @@ class EventSubConfig extends UpdatingControlPanel<eventsubpb.EventSubConfig> {
 
         this._enabled = this.querySelector('#enabled');
         this._log = this.querySelector('#log');
-        this._profile = this.querySelector('#select-profile');
+        this._profile = new ProfileSelector();
+        this._profile.id = 'select-profile';
+        this._profile.title = profileTitle;
+        this.querySelector('label[for="select-profile"]').after(this._profile);
 
         this.querySelector('form').addEventListener('submit', () => {
             let cfg = this.last.clone();
@@ -137,7 +140,7 @@ class EventSubConfig extends UpdatingControlPanel<eventsubpb.EventSubConfig> {
     update(cfg: eventsubpb.EventSubConfig) {
         this._enabled.checked = cfg.enabled;
         this._log.checked = cfg.logEvents;
-        this._profile.value = cfg.profile;
+        this._profile.selected = cfg.profile;
     }
 }
 customElements.define('twitch-es-config', EventSubConfig, { extends: 'fieldset' });
