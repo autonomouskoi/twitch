@@ -3,7 +3,7 @@ import * as buspb from "/pb/bus/bus_pb.js";
 import * as commandpb from "/m/twitch/pb/command_pb.js";
 import * as requestpb from "/m/twitch/pb/request_pb.js";
 import * as twitchpb from "/m/twitch/pb/twitch_pb.js";
-import { ControlPanel } from "/tk.js";
+import { ControlPanel, VoidPromise } from "/tk.js";
 
 const TOPIC_COMMAND = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_COMMAND);
 const TOPIC_REQUEST = enumName(twitchpb.BusTopics, twitchpb.BusTopics.TWITCH_REQUEST);
@@ -165,17 +165,10 @@ customElements.define('twitch-profiles', Profiles, { extends: 'fieldset' });
 
 class ProfileSelector extends HTMLSelectElement {
 
-    private _populated: Promise<void>;
-    private _resolve: (value: void | PromiseLike<void>) => void;
-    private _reject: (reason?: any) => void;
+    private _ready = new VoidPromise();
 
     constructor() {
         super();
-
-        this._populated = new Promise<void>((resolve, reject) => {
-            this._resolve = resolve;
-            this._reject = reject;
-        });
 
         this.update();
     }
@@ -198,12 +191,12 @@ class ProfileSelector extends HTMLSelectElement {
                         option.innerHTML += ` ${profileSymbol(profile)}`;
                         this.appendChild(option);
                     });
-                this._resolve();
-            }).catch((e) => this._reject(e));
+                this._ready.resolve();
+            }).catch((e) => this._ready.reject(e));
     }
 
     set selected(value: string) {
-        this._populated.then(() => this.value = value);
+        this._ready.wait.then(() => this.value = value);
     }
 }
 customElements.define('twitch-profile-select', ProfileSelector, { extends: 'select' });
