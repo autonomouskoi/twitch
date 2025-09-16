@@ -71,8 +71,9 @@ message GetUserResponse {
 }
 
 message SendShoutoutRequest {
+    reserved 3;
     string  from_profile      = 1;
-    string  to_broadcaster_id  = 2;
-    string  moderator_id       = 3;
+    string  to_broadcaster_id = 2;
+    string  from_channel      = 4;
 }
 message SendShoutoutResponse {}

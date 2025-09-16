@@ -81,14 +81,25 @@ func (so *shoutouts) send(req *SendShoutoutRequest) {
 	if _, present := so.recent[req.ToBroadcasterId]; present {
 		return
 	}
+	fromBClient := so.clients[req.FromChannel]
+	if fromBClient == nil {
+		so.log.Error("no matching broadcaster client", "profile", req.FromChannel)
+		return
+	}
 	so.recent[req.ToBroadcasterId] = now.Add(shoutoutExpiration)
-	resp, err := client.SendShoutout(&helix.SendShoutoutParams{
-		FromBroadcasterID: client.token.UserId,
+	twitchReq := &helix.SendShoutoutParams{
+		FromBroadcasterID: fromBClient.token.UserId,
 		ToBroadcasterID:   req.ToBroadcasterId,
-		ModeratorID:       req.ModeratorId,
-	})
+		ModeratorID:       client.token.UserId,
+	}
+	resp, err := client.SendShoutout(twitchReq)
 	if err := extractError(err, resp.ResponseCommon); err != nil {
-		so.log.Error("sending shoutout request", "error", err.Error())
+		so.log.Error("sending shoutout request",
+			"from_profile", req.FromProfile,
+			"from_broadcaster_id", twitchReq.FromBroadcasterID,
+			"to_broadcaster_id", twitchReq.ToBroadcasterID,
+			"moderator_id", twitchReq.ModeratorID,
+			"error", err.Error())
 	}
 }
 
