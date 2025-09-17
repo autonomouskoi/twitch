@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	shoutoutDelay      = time.Second * (120 * 5)   // 2 minutes per SO, +headroom
+	shoutoutDelay      = time.Second * (120 + 5)   // 2 minutes per SO, +headroom
 	shoutoutExpiration = time.Hour + time.Second*5 // two hours for repeat SO, +headroom
 )
 
