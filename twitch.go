@@ -108,9 +108,8 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 	}
 	t.Handler = http.FileServer(fs)
 
-	t.cfg = &Config{}
-	if err := t.kv.GetProto(cfgKVKey, t.cfg); err != nil && !errors.Is(err, akcore.ErrNotFound) {
-		return fmt.Errorf("retrieving config: %w", err)
+	if err := t.loadCfg(); err != nil {
+		return err
 	}
 	defer t.writeCfg()
 
@@ -130,6 +129,27 @@ func (t *Twitch) Start(ctx context.Context, deps *modutil.ModuleDeps) error {
 	t.Go(func() error { return t.handleEventSub(ctx) })
 
 	return t.Wait()
+}
+
+func (t *Twitch) loadCfg() error {
+	t.cfg = &Config{}
+	if err := t.kv.GetProto(cfgKVKey, t.cfg); err != nil && !errors.Is(err, akcore.ErrNotFound) {
+		return fmt.Errorf("retrieving config: %w", err)
+	}
+	profiles := t.cfg.GetProfiles()
+	if t.cfg.ChatConfig != nil {
+		if _, present := profiles[t.cfg.ChatConfig.Profile]; !present {
+			t.cfg.ChatConfig.Profile = ""
+			t.cfg.ChatConfig.Enabled = false
+		}
+	}
+	if t.cfg.EsConfig != nil {
+		if _, present := profiles[t.cfg.EsConfig.Profile]; !present {
+			t.cfg.EsConfig.Profile = ""
+			t.cfg.EsConfig.Enabled = false
+		}
+	}
+	return nil
 }
 
 func (t *Twitch) writeCfg() {

@@ -170,7 +170,16 @@ class ProfileSelector extends HTMLSelectElement {
     constructor() {
         super();
 
+        this._init();
         this.update();
+    }
+
+    private _init() {
+        this.textContent = '';
+        let option = document.createElement('option');
+        option.value = '';
+        option.innerText = '-- none selected --';
+        this.appendChild(option);
     }
 
     update() {
@@ -181,7 +190,7 @@ class ProfileSelector extends HTMLSelectElement {
                 message: new requestpb.ListProfilesRequest().toBinary(),
             }))).then((reply) => {
                 let resp = requestpb.ListProfilesResponse.fromBinary(reply.message);
-                this.textContent = '';
+                this._init();
                 resp.profiles
                     .toSorted((a, b) => a.name.localeCompare(b.name))
                     .forEach((profile) => {
@@ -196,7 +205,13 @@ class ProfileSelector extends HTMLSelectElement {
     }
 
     set selected(value: string) {
-        this._ready.wait.then(() => this.value = value);
+        this._ready.wait.then(() => {
+            if (this.querySelector(`option[value="${value}"]`)) {
+                this.value = value;
+                return;
+            }
+            this.value = '';
+        });
     }
 }
 customElements.define('twitch-profile-select', ProfileSelector, { extends: 'select' });
